@@ -40,3 +40,28 @@ class TestObjectLocator(TestCase):
                 AttributeLoader(cls=ASampleTestCase, attr="test_foo"),
             ],
         )
+
+    def test_it_finds_test_case_classes_on_modules(self):
+        locator = locators.ObjectLocator(
+            is_test_class=(lambda attr, value : attr != "Foo"),
+        )
+        from virtue.tests import module_for_TestObjectLocator as module
+        cases = locator.locate_in(module)
+        self.assertEqual(
+            sorted(cases, key=attrgetter("attr")), [
+                AttributeLoader(cls=module.Baz, attr="test_bar"),
+                AttributeLoader(cls=module.Baz, attr="test_baz"),
+                AttributeLoader(cls=module.Bar, attr="test_foo"),
+                AttributeLoader(cls=module.OldStyle, attr="test_old"),
+            ],
+        )
+
+    def test_by_default_it_looks_for_classes_inheriting_TestCase(self):
+        locator = locators.ObjectLocator()
+        from virtue.tests import module_for_TestObjectLocator as module
+        cases = locator.locate_in(module)
+        self.assertEqual(
+            sorted(cases, key=attrgetter("attr")), [
+                AttributeLoader(cls=module.Foo, attr="test_foo"),
+            ],
+        )
