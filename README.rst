@@ -6,6 +6,9 @@ Virtue
 `unittest <https://docs.python.org/2/library/unittest.html>`_ compliant
 test runner.
 
+It is *not* a test framework (it doesn't contain a ``TestCase`` subclass
+and it never will).
+
 
 Contributing
 ------------
