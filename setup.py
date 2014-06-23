@@ -3,6 +3,7 @@ import os
 from setuptools import find_packages, setup
 
 from virtue import __version__
+from virtue.compat import HAS_UNITTEST2
 
 
 BIN_DIR = os.path.join(os.path.dirname(__file__), "bin")
@@ -24,11 +25,16 @@ classifiers = [
     "Programming Language :: Python :: Implementation :: PyPy"
 ]
 
+install_requires = ["Twisted>=14.0.0"]
+if not HAS_UNITTEST2:
+    install_requires.append("unittest2")
+
 setup(
     name="virtue",
     version=__version__,
     packages=find_packages(),
     scripts=[os.path.join(BIN_DIR, bin) for bin in os.listdir(BIN_DIR)],
+    install_requires=install_requires,
     author="Julian Berman",
     author_email="Julian@GrayVines.com",
     classifiers=classifiers,

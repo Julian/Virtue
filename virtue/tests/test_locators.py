@@ -1,17 +1,20 @@
 from operator import attrgetter
-from unittest import TestCase
+import shutil
+
+from twisted.python.filepath import FilePath
 
 from virtue import locators
+from virtue.compat import unittest
 from virtue.loaders import AttributeLoader
 
 
-class TestObjectLocator(TestCase):
+class TestObjectLocator(unittest.TestCase):
     def test_it_finds_methods_on_test_cases(self):
         locator = locators.ObjectLocator(
             is_test_method=locators.prefixed_by("TEST"),
         )
 
-        class ASampleTestCase(TestCase):
+        class ASampleTestCase(unittest.TestCase):
             def not_a_test(self): pass
             def TEST1(self): pass
             def TEST_2(self): pass
@@ -27,7 +30,7 @@ class TestObjectLocator(TestCase):
     def test_by_default_it_looks_for_methods_prefixed_by_test(self):
         locator = locators.ObjectLocator()
 
-        class ASampleTestCase(TestCase):
+        class ASampleTestCase(unittest.TestCase):
             def not_a_test(self): pass
             def TEST1(self): pass
             def test_foo(self): pass
@@ -65,3 +68,47 @@ class TestObjectLocator(TestCase):
                 AttributeLoader(cls=module.Foo, attr="test_foo"),
             ],
         )
+
+    def test_it_finds_test_cases_recursively_in_packages(self):
+        locator = locators.ObjectLocator(
+            is_test_module=(lambda name : name != "foo"),
+        )
+        package = self.create_package_with_tests(locator)
+        cases = locator.locate_in(package)
+        self.assertEqual(
+            sorted(case.module.name for case in cases), [
+                b"virtue.tests.temp",
+                b"virtue.tests.temp.bar",
+                b"virtue.tests.temp.sub",
+                b"virtue.tests.temp.sub.test_quux",
+                b"virtue.tests.temp.test_baz",
+            ],
+        )
+
+    def test_by_default_it_finds_test_cases_in_modules_named_test_(self):
+        locator = locators.ObjectLocator()
+        package = self.create_package_with_tests(locator)
+        cases = locator.locate_in(package)
+        self.assertEqual(
+            sorted(case.module.name for case in cases), [
+                b"virtue.tests.temp.sub.test_quux",
+                b"virtue.tests.temp.test_baz",
+            ],
+        )
+
+    def create_package_with_tests(self, locator):
+        package_path = FilePath(__file__).sibling(b"temp")
+        package_path.makedirs()
+        self.addCleanup(shutil.rmtree, package_path.path)
+
+        package_path.child(b"__init__.py").setContent(b"")
+        package_path.child(b"bar.py").setContent(b"")
+        package_path.child(b"test_baz.py").setContent(b"")
+
+        subpackage = package_path.child(b"sub")
+        subpackage.makedirs()
+        subpackage.child(b"__init__.py").setContent(b"")
+        subpackage.child(b"test_quux.py").setContent(b"")
+
+        from virtue.tests import temp as package
+        return package

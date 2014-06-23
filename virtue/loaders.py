@@ -27,3 +27,31 @@ class AttributeLoader(object):
             "<{self.__class__.__name__} "
             "cls={self.cls.__name__!r} attr={self.attr!r}>".format(self=self)
         )
+
+
+class ModuleLoader(object):
+    """
+    I load a test case by locating tests in the module with the given name.
+
+    """
+
+    def __init__(self, locator, module):
+        self.locator = locator
+        self.module = module
+
+    def __eq__(self, other):
+        if not isinstance(other, self.__class__):
+            return NotImplemented
+        return self.locator == other.locator and self.module == other.module
+
+    def __ne__(self, other):
+        if not isinstance(other, self.__class__):
+            return NotImplemented
+        return not self == other
+
+    def __repr__(self):
+        return (
+            "<{self.__class__.__name__} module={self.module.name}>".format(
+                self=self,
+            )
+        )
