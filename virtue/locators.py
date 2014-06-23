@@ -29,7 +29,7 @@ def inherits_from_TestCase(attr, cls):
 
 class ObjectLocator(object):
     """
-    I locate test cases on an object: a package, module, test class, or method.
+    I locate test cases on an object: a package, module or test class.
 
     """
 
@@ -72,8 +72,14 @@ class ObjectLocator(object):
             if is_package is not None:
                 return self.locate_in_package(obj)
             return self.locate_in_module(obj)
-        else:
+        elif inspect.isclass(obj):
             return self.locate_in_class(obj)
+        else:
+            raise ValueError(
+                "Can't determine the appropriate way to load {0!r}".format(
+                    obj,
+                )
+            )
 
     def locate_in_package(self, package):
         """
