@@ -56,7 +56,7 @@ class TestObjectLocator(unittest.TestCase):
         locator = locators.ObjectLocator(
             is_test_class=(lambda attr, value : attr != "Foo"),
         )
-        from virtue.tests import module_for_TestObjectLocator as module
+        from virtue.tests.samples import module_for_TestObjectLocator as module
         cases = locator.locate_in(module)
         self.assertEqual(
             sorted(cases, key=attrgetter("attr")), [
@@ -69,7 +69,7 @@ class TestObjectLocator(unittest.TestCase):
 
     def test_by_default_it_looks_for_classes_inheriting_TestCase(self):
         locator = locators.ObjectLocator()
-        from virtue.tests import module_for_TestObjectLocator as module
+        from virtue.tests.samples import module_for_TestObjectLocator as module
         cases = locator.locate_in(module)
         self.assertEqual(
             sorted(cases, key=attrgetter("attr")), [
