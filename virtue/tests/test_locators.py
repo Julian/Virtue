@@ -2,6 +2,7 @@ from operator import attrgetter
 import shutil
 
 from twisted.python.filepath import FilePath
+from twisted.python.reflect import fullyQualifiedName
 
 from virtue import locators
 from virtue.compat import unittest
@@ -9,6 +10,13 @@ from virtue.loaders import AttributeLoader
 
 
 class TestObjectLocator(unittest.TestCase):
+    def test_it_finds_tests_in_an_object_specified_by_name(self):
+        locator = locators.ObjectLocator()
+        self.assertEqual(
+            list(locator.locate_by_name(fullyQualifiedName(self.__class__))),
+            list(locator.locate_in(self.__class__)),
+        )
+
     def test_it_finds_methods_on_test_cases(self):
         locator = locators.ObjectLocator(
             is_test_method=locators.prefixed_by("TEST"),

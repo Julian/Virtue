@@ -2,6 +2,7 @@ from unittest import TestCase
 import inspect
 
 from twisted.python.modules import getModule as get_module
+from twisted.python.reflect import namedAny as named_any
 
 from virtue.loaders import AttributeLoader, ModuleLoader
 
@@ -58,6 +59,19 @@ class ObjectLocator(object):
         self.is_test_method = is_test_method
         self.is_test_module = is_test_module
         self.is_test_class = is_test_class
+
+    def locate_by_name(self, name):
+        """
+        Locate any tests found in the object referred to by the given name.
+
+        The name should be a fully qualified object name. (E.g., the fully
+        qualified object name of this function is
+        ``virtue.locators.ObjectLocator.locate_by_name``\ ).
+
+        """
+
+        obj = named_any(name)
+        return self.locate_in(obj)
 
     def locate_in(self, obj):
         """
