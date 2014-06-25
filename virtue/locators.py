@@ -1,5 +1,5 @@
 from unittest import TestCase
-import inspect
+from inspect import isclass, ismethod, ismodule
 
 from twisted.python.modules import getModule as get_module
 from twisted.python.reflect import namedAny as named_any
@@ -71,6 +71,15 @@ class ObjectLocator(object):
         """
 
         obj = named_any(name)
+        if ismethod(obj):
+            class_name, dot, method_name = name.rpartition(".")
+            cls = named_any(class_name)
+
+            is_aliased = not isclass(cls)
+            if is_aliased:
+                cls, method_name = obj.im_class, obj.__name__
+
+            return [AttributeLoader(cls=cls, attr=method_name)]
         return self.locate_in(obj)
 
     def locate_in(self, obj):
@@ -81,12 +90,12 @@ class ObjectLocator(object):
 
         # We don't use inspect.getmembers because its predicate only
         # takes the value, not the attr name.
-        if inspect.ismodule(obj):
+        if ismodule(obj):
             is_package = getattr(obj, "__path__", None)
             if is_package is not None:
                 return self.locate_in_package(obj)
             return self.locate_in_module(obj)
-        elif inspect.isclass(obj):
+        elif isclass(obj):
             return self.locate_in_class(obj)
         else:
             raise ValueError(
@@ -114,7 +123,7 @@ class ObjectLocator(object):
 
         for attr in dir(module):
             value = getattr(module, attr, None)
-            if inspect.isclass(value) and self.is_test_class(attr, value):
+            if isclass(value) and self.is_test_class(attr, value):
                 for test_case in self.locate_in_class(value):
                     yield test_case
 

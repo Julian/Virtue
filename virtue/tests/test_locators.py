@@ -17,6 +17,28 @@ class TestObjectLocator(unittest.TestCase):
             list(locator.locate_in(self.__class__)),
         )
 
+    def test_it_can_locate_methods_directly_by_name(self):
+        locator = locators.ObjectLocator()
+        this_name = "test_it_can_locate_methods_directly_by_name"
+        this_fully_qualified_name = ".".join(
+            [fullyQualifiedName(self.__class__), this_name],
+        )
+        self.assertEqual(
+            list(locator.locate_by_name(this_fully_qualified_name)),
+            [AttributeLoader(cls=self.__class__, attr=this_name)],
+        )
+
+    def test_it_can_locate_aliased_methods_directly_by_name(self):
+        locator = locators.ObjectLocator()
+        this_name = "test_it_can_locate_aliased_methods_directly_by_name"
+        aliased_fully_qualified_name = ".".join(
+            [self.__class__.__module__, "aliased"],
+        )
+        self.assertEqual(
+            list(locator.locate_by_name(aliased_fully_qualified_name)),
+            [AttributeLoader(cls=self.__class__, attr=this_name)],
+        )
+
     def test_it_finds_methods_on_test_cases(self):
         locator = locators.ObjectLocator(
             is_test_method=locators.prefixed_by("TEST"),
@@ -124,3 +146,8 @@ class TestObjectLocator(unittest.TestCase):
 
         from virtue.tests import temp as package
         return package
+
+
+# Used to check that we locate or blow up properly on unbound methods
+aliased_attr = "test_it_can_locate_aliased_methods_directly_by_name"
+aliased = getattr(TestObjectLocator, aliased_attr)
