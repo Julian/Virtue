@@ -28,6 +28,9 @@ class AttributeLoader(object):
             "cls={self.cls.__name__!r} attr={self.attr!r}>".format(self=self)
         )
 
+    def load(self):
+        return [self.cls(self.attr)]
+
 
 class ModuleLoader(object):
     """

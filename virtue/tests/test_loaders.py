@@ -5,6 +5,11 @@ from virtue.compat import unittest
 
 
 class TestAttributeLoader(unittest.TestCase):
+    def test_it_loads_attributes(self):
+        cls, attr = self.__class__, "test_it_loads_attributes"
+        loader = loaders.AttributeLoader(cls=cls, attr=attr)
+        self.assertEqual(list(loader.load()), [cls(attr)])
+
     def test_eq_neq(self):
         cls = self.__class__
         loader = loaders.AttributeLoader(cls=cls, attr="test_eq")
