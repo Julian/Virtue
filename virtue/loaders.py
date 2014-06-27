@@ -1,3 +1,6 @@
+import itertools
+
+
 class AttributeLoader(object):
     """
     I load a test case by instantiating a class with a given attribute name.
@@ -57,4 +60,10 @@ class ModuleLoader(object):
             "<{self.__class__.__name__} module={self.module.name}>".format(
                 self=self,
             )
+        )
+
+    def load(self):
+        class_loaders = self.locator.locate_in_module(self.module.load())
+        return itertools.chain.from_iterable(
+            class_loader.load() for class_loader in class_loaders
         )
