@@ -128,7 +128,7 @@ class TestObjectLocator(unittest.TestCase):
 
     def test_it_knows_what_it_does_not_know(self):
         with self.assertRaises(ValueError):
-            cases = locators.ObjectLocator().locate_in(object())
+            locators.ObjectLocator().locate_in(object())
 
     def create_package_with_tests(self, locator):
         package_path = FilePath(__file__).sibling(b"temp")
