@@ -3,7 +3,7 @@ import os
 from setuptools import find_packages, setup
 
 from virtue import __version__
-from virtue.compat import HAS_UNITTEST2
+from virtue.compat import PY26
 
 
 BIN_DIR = os.path.join(os.path.dirname(__file__), "bin")
@@ -26,8 +26,8 @@ classifiers = [
 ]
 
 install_requires = ["Twisted>=14.0.0"]
-if not HAS_UNITTEST2:
-    install_requires.append("unittest2")
+if PY26:
+    install_requires.extend(["argparse", "unittest2"])
 
 setup(
     name="virtue",

@@ -1,9 +1,9 @@
 import sys
 
 
-HAS_UNITTEST2 = sys.version_info[:2] > (2, 6)
+PY26 = sys.version_info[:2] == (2, 6)
 
-if HAS_UNITTEST2:
-    import unittest
-else:
+if PY26:
     import unittest2 as unittest
+else:
+    import unittest
