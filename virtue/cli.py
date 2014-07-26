@@ -1,8 +1,8 @@
 import argparse
 import sys
 
-from virtue import __version__, locators
-from virtue.compat import unittest
+from virtue import __version__
+from virtue.runner import run
 
 
 parser = argparse.ArgumentParser(
@@ -24,20 +24,6 @@ parser.add_argument(
 def main(args=sys.argv[1:]):
     result = run(**parse_args(args=args))
     sys.exit(not result.wasSuccessful())
-
-
-def run(tests=()):
-    locator = locators.ObjectLocator()
-    cases = (
-        case
-        for test in tests
-        for loader in locator.locate_by_name(test)
-        for case in loader.load()
-    )
-    suite = unittest.TestSuite(cases)
-    result = unittest.TestResult()
-    suite.run(result)
-    return result
 
 
 def parse_args(args):
