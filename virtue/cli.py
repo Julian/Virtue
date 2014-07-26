@@ -7,7 +7,7 @@ from virtue.compat import unittest
 
 parser = argparse.ArgumentParser(
     prog="virtue",
-    description="virtue runs tests from any modules and objects specified",
+    description="virtue discovers and runs tests found in the given objects",
 )
 parser.add_argument(
     "-V", "--version",
