@@ -14,5 +14,7 @@ def run(tests=(), reporter=None):
         for case in loader.load()
     )
     suite = unittest.TestSuite(cases)
+    getattr(reporter, "startTestRun", lambda : None)()
     suite.run(reporter)
+    getattr(reporter, "stopTestRun", lambda : None)()
     return reporter

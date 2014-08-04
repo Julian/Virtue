@@ -5,11 +5,13 @@ from twisted.python.reflect import namedAny as named_any
 import twisted.trial.reporter
 
 from virtue import __version__
+from virtue.reporters import ComponentizedReporter
 from virtue.runner import run
 
 
 _BUILT_IN_REPORTERS = {
     "bwverbose" : twisted.trial.reporter.VerboseTextReporter,
+    "default" : ComponentizedReporter,
     "subunit" : twisted.trial.reporter.SubunitReporter,
     "summary" : twisted.trial.reporter.MinimalReporter,
     "text" : twisted.trial.reporter.TextReporter,
@@ -42,7 +44,7 @@ parser.add_argument(
 )
 parser.add_argument(
     "--reporter",
-    default=twisted.trial.reporter.TreeReporter(),
+    default=ComponentizedReporter(),
     help="the name of a reporter to use for outputting test results",
     type=_reporter_by_name,
 )
