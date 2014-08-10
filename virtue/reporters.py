@@ -21,27 +21,36 @@ class ComponentizedReporter(object):
     def startTestRun(self):
         self._start_time = time()
         self.recorder.startTestRun()
+        self.stream.writelines(self.outputter.run_started() or "")
 
     def stopTestRun(self):
         self.recorder.stopTestRun()
         runtime = time() - self._start_time
         self.stream.writelines(
-            self.outputter.summarize(self.recorder, runtime) or ""
+            self.outputter.run_stopped(self.recorder, runtime) or ""
         )
 
     def startTest(self, test):
-        self.stream.writelines(self.outputter.started(test) or "")
+        self.stream.writelines(self.outputter.test_started(test) or "")
 
     def stopTest(self, test):
-        self.stream.writelines(self.outputter.stopped(test) or "")
+        self.stream.writelines(self.outputter.test_stopped(test) or "")
+
+    def addError(self, test, exc_info):
+        self.recorder.addError(test, exc_info)
+        self.stream.writelines(
+            self.outputter.test_errored(test, exc_info) or ""
+        )
 
     def addFailure(self, test, exc_info):
         self.recorder.addFailure(test, exc_info)
-        self.stream.writelines(self.outputter.failed(test, exc_info) or "")
+        self.stream.writelines(
+            self.outputter.test_failed(test, exc_info) or ""
+        )
 
     def addSuccess(self, test):
         self.recorder.addSuccess(test)
-        self.stream.writelines(self.outputter.succeeded(test) or "")
+        self.stream.writelines(self.outputter.test_succeeded(test) or "")
 
     def wasSuccessful(self):
         return self.recorder.wasSuccessful()
@@ -56,7 +65,20 @@ class Outputter(object):
         self.indent = indent
         self.line_width = line_width
 
-    def started(self, test):
+    def run_started(self):
+        pass
+
+    def run_stopped(self, recorder, runtime):
+        yield "\n"
+        yield "-" * self.line_width
+        yield "\n"
+        yield "Ran {recorder.count} tests in {runtime:.3f}s\n".format(
+            recorder=recorder, runtime=runtime,
+        )
+        yield "\n"
+        yield "PASSED\n" if recorder.wasSuccessful() else "FAILED\n"
+
+    def test_started(self, test):
         cls = test.__class__
         module = cls.__module__
 
@@ -71,26 +93,24 @@ class Outputter(object):
             yield cls.__name__
             yield "\n"
 
-    def stopped(self, test):
+    def test_stopped(self, test):
         pass
 
-    def succeeded(self, test):
+    def test_errored(self, test, exc_info):
+        return self.format_line(
+            test,
+            "{Style.BRIGHT}{Fore.RED}[ERROR]{Style.RESET_ALL}".format(
+                Fore=Fore, Style=Style,
+            ),
+        )
+
+    def test_succeeded(self, test):
         return self.format_line(
             test,
             "{Style.BRIGHT}{Fore.GREEN}[OK]{Style.RESET_ALL}".format(
                 Fore=Fore, Style=Style,
             ),
         )
-
-    def summarize(self, recorder, runtime):
-        yield "\n"
-        yield "-" * self.line_width
-        yield "\n"
-        yield "Ran {recorder.count} tests in {runtime:3f}s\n".format(
-            recorder=recorder, runtime=runtime,
-        )
-        yield "\n"
-        yield "PASSED\n" if recorder.wasSuccessful() else "FAILED\n"
 
     def format_line(self, test, result):
         before = "{indent}{indent}{test._testMethodName} ...".format(
@@ -116,11 +136,14 @@ class Recorder(object):
     def stopTestRun(self):
         pass
 
-    def addSuccess(self, test):
-        self.successes.append(test)
+    def addError(self, test, exc_info):
+        self.errors.append(test)
 
     def addFailure(self, test, exc_info):
         self.failures.append(test)
+
+    def addSuccess(self, test):
+        self.successes.append(test)
 
     def wasSuccessful(self):
         return not self.failures and not self.errors
