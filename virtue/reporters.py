@@ -1,7 +1,9 @@
 from time import time
+from traceback import format_exc
 import sys
 
 from colorama import Fore, Style
+from twisted.python.reflect import fullyQualifiedName as fully_qualified_name
 
 
 class ComponentizedReporter(object):
@@ -65,10 +67,14 @@ class Outputter(object):
         self.indent = indent
         self.line_width = line_width
 
+        self._after = []
+
     def run_started(self):
         pass
 
     def run_stopped(self, recorder, runtime):
+        for line in self._after:
+            yield line
         yield "\n"
         yield "-" * self.line_width
         yield "\n"
@@ -76,7 +82,33 @@ class Outputter(object):
             recorder=recorder, runtime=runtime,
         )
         yield "\n"
-        yield "PASSED\n" if recorder.wasSuccessful() else "FAILED\n"
+        if recorder.wasSuccessful():
+            yield "{Style.BRIGHT}{Fore.GREEN}PASSED{Style.RESET_ALL}".format(
+                Fore=Fore, Style=Style,
+            )
+        else:
+            yield "{Style.BRIGHT}{Fore.RED}FAILED{Style.RESET_ALL}".format(
+                Fore=Fore, Style=Style,
+            )
+
+        if recorder.count:
+            yield " ("
+            summary = []
+
+            successes = len(recorder.successes)
+            if successes:
+                summary.append("successes=" + str(successes))
+            failures = len(recorder.failures)
+            if failures:
+                summary.append("failures=" + str(failures))
+            errors = len(recorder.errors)
+            if errors:
+                summary.append("errors=" + str(errors))
+
+            yield ", ".join(summary)
+            yield ")"
+
+        yield "\n"
 
     def test_started(self, test):
         cls = test.__class__
@@ -97,9 +129,43 @@ class Outputter(object):
         pass
 
     def test_errored(self, test, exc_info):
+        self._after.extend(
+            [
+                "\n",
+                "=" * self.line_width,
+                "\n",
+                "[ERROR]\n",
+                format_exc(exc_info),
+                "\n",
+                fully_qualified_name(test.__class__),
+                ".",
+                test._testMethodName,
+            ],
+        )
         return self.format_line(
             test,
             "{Style.BRIGHT}{Fore.RED}[ERROR]{Style.RESET_ALL}".format(
+                Fore=Fore, Style=Style,
+            ),
+        )
+
+    def test_failed(self, test, exc_info):
+        self._after.extend(
+            [
+                "\n",
+                "=" * self.line_width,
+                "\n",
+                "[FAIL]\n",
+                format_exc(exc_info),
+                "\n",
+                fully_qualified_name(test.__class__),
+                ".",
+                test._testMethodName,
+            ],
+        )
+        return self.format_line(
+            test,
+            "{Style.BRIGHT}{Fore.RED}[FAIL]{Style.RESET_ALL}".format(
                 Fore=Fore, Style=Style,
             ),
         )
