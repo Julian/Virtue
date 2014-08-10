@@ -20,8 +20,10 @@ class ComponentizedReporter(object):
 
     def startTestRun(self):
         self._start_time = time()
+        self.recorder.startTestRun()
 
     def stopTestRun(self):
+        self.recorder.stopTestRun()
         runtime = time() - self._start_time
         self.stream.writelines(
             self.outputter.summarize(self.recorder, runtime) or ""
@@ -107,6 +109,12 @@ class Recorder(object):
     @property
     def count(self):
         return len(self.errors) + len(self.failures) + len(self.successes)
+
+    def startTestRun(self):
+        pass
+
+    def stopTestRun(self):
+        pass
 
     def addSuccess(self, test):
         self.successes.append(test)
