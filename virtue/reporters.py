@@ -50,6 +50,10 @@ class ComponentizedReporter(object):
             self.outputter.test_failed(test, exc_info) or ""
         )
 
+    def addSkip(self, test, reason):
+        self.recorder.addSkip(test, reason)
+        self.stream.writelines(self.outputter.test_skipped(test, reason) or "")
+
     def addSuccess(self, test):
         self.recorder.addSuccess(test)
         self.stream.writelines(self.outputter.test_succeeded(test) or "")
@@ -98,6 +102,9 @@ class Outputter(object):
             successes = len(recorder.successes)
             if successes:
                 summary.append("successes=" + str(successes))
+            skips = len(recorder.skips)
+            if skips:
+                summary.append("skips=" + str(skips))
             failures = len(recorder.failures)
             if failures:
                 summary.append("failures=" + str(failures))
@@ -170,6 +177,27 @@ class Outputter(object):
             ),
         )
 
+    def test_skipped(self, test, reason):
+        self._after.extend(
+            [
+                "\n",
+                "=" * self.line_width,
+                "\n",
+                "[SKIPPED]\n",
+                reason,
+                "\n",
+                fully_qualified_name(test.__class__),
+                ".",
+                test._testMethodName,
+            ],
+        )
+        return self.format_line(
+            test,
+            "{Style.BRIGHT}{Fore.BLUE}[SKIPPED]{Style.RESET_ALL}".format(
+                Fore=Fore, Style=Style,
+            ),
+        )
+
     def test_succeeded(self, test):
         return self.format_line(
             test,
@@ -190,11 +218,17 @@ class Recorder(object):
     def __init__(self):
         self.errors = []
         self.failures = []
+        self.skips = []
         self.successes = []
 
     @property
     def count(self):
-        return len(self.errors) + len(self.failures) + len(self.successes)
+        return (
+            len(self.errors) +
+            len(self.failures) +
+            len(self.skips) +
+            len(self.successes)
+        )
 
     def startTestRun(self):
         pass
@@ -207,6 +241,9 @@ class Recorder(object):
 
     def addFailure(self, test, exc_info):
         self.failures.append(test)
+
+    def addSkip(self, test, reason):
+        self.skips.append(test)
 
     def addSuccess(self, test):
         self.successes.append(test)
