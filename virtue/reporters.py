@@ -220,6 +220,7 @@ class Recorder(object):
         self.failures = []
         self.skips = []
         self.successes = []
+        self.unexpected_successes = []
 
     @property
     def count(self):
@@ -248,5 +249,8 @@ class Recorder(object):
     def addSuccess(self, test):
         self.successes.append(test)
 
+    def addUnexpectedSuccess(self, test):
+        self.unexpected_successes.append(test)
+
     def wasSuccessful(self):
-        return not self.failures and not self.errors
+        return not (self.errors or self.failures or self.unexpected_successes)
