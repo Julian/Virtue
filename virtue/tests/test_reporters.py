@@ -29,3 +29,12 @@ class TestRecorder(unittest.TestCase):
         self.recorder.addUnexpectedSuccess(success)
         self.assertEqual(self.recorder.unexpected_successes, [success])
         self.assertFalse(self.recorder.wasSuccessful())
+
+    def test_count(self):
+        test, exc_info, reason = object(), object(), "Because!"
+        self.recorder.addError(test=test, exc_info=exc_info)
+        self.recorder.addFailure(test=test, exc_info=exc_info)
+        self.recorder.addSkip(test=test, reason=reason)
+        self.recorder.addSuccess(test=test)
+        self.recorder.addUnexpectedSuccess(test=test)
+        self.assertEqual(self.recorder.count, 5)

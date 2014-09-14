@@ -111,6 +111,9 @@ class Outputter(object):
             errors = len(recorder.errors)
             if errors:
                 summary.append("errors=" + str(errors))
+            unexpected_successes = len(recorder.unexpected_successes)
+            if unexpected_successes:
+                summary.append("unexpected_successes=" + str(unexpected_successes))
 
             yield ", ".join(summary)
             yield ")"
@@ -224,11 +227,14 @@ class Recorder(object):
 
     @property
     def count(self):
-        return (
-            len(self.errors) +
-            len(self.failures) +
-            len(self.skips) +
-            len(self.successes)
+        return sum(
+            len(tests) for tests in (
+                self.errors,
+                self.failures,
+                self.skips,
+                self.successes,
+                self.unexpected_successes,
+            )
         )
 
     def startTestRun(self):
