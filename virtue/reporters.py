@@ -2,7 +2,6 @@ from time import time
 from traceback import format_exc
 import sys
 
-from colorama import Fore, Style
 from twisted.python.reflect import fullyQualifiedName as fully_qualified_name
 
 
@@ -10,7 +9,9 @@ class ComponentizedReporter(object):
 
     shouldStop = False
 
-    def __init__(self, outputter=None, recorder=None, stream=sys.stdout):
+    def __init__(
+        self, outputter=None, recorder=None, stream=sys.stdout, time=time,
+    ):
         if outputter is None:
             outputter = Outputter()
         if recorder is None:
@@ -19,15 +20,16 @@ class ComponentizedReporter(object):
         self.outputter = outputter
         self.recorder = recorder
         self.stream = stream
+        self._time = time
 
     def startTestRun(self):
-        self._start_time = time()
+        self._start_time = self._time()
         self.recorder.startTestRun()
         self.stream.writelines(self.outputter.run_started() or "")
 
     def stopTestRun(self):
         self.recorder.stopTestRun()
-        runtime = time() - self._start_time
+        runtime = self._time() - self._start_time
         self.stream.writelines(
             self.outputter.run_stopped(self.recorder, runtime) or ""
         )
@@ -67,9 +69,34 @@ class Outputter(object):
     _last_test_class = None
     _last_test_module = None
 
-    def __init__(self, indent=" " * 2, line_width=120):
+    FAILED, PASSED = "FAILED", "PASSED"
+    ERROR, FAIL, OK, SKIPPED = "[ERROR]", "[FAIL]", "[OK]", "[SKIPPED]"
+
+    def __init__(self, colored=True, indent=" " * 2, line_width=120):
         self.indent = indent
         self.line_width = line_width
+
+        if colored:
+            from colorama import Fore, Style
+            message = "{Style.BRIGHT}{color}{text}{Style.RESET_ALL}"
+            for attr, color, text in [
+                ("_error", Fore.RED, self.ERROR),
+                ("_fail", Fore.RED, self.FAIL),
+                ("_failed", Fore.RED, self.FAILED),
+                ("_ok", Fore.GREEN, self.OK),
+                ("_passed", Fore.GREEN, self.PASSED),
+                ("_skipped", Fore.BLUE, self.SKIPPED),
+            ]:
+                setattr(
+                    self, attr, message.format(
+                        Style=Style, color=color, text=text,
+                    )
+                )
+        else:
+            self._error = self.ERROR
+            self._failed = self.FAILED
+            self._passed = self.PASSED
+            self._skipped = self.SKIPPED
 
         self._after = []
 
@@ -82,18 +109,15 @@ class Outputter(object):
         yield "\n"
         yield "-" * self.line_width
         yield "\n"
-        yield "Ran {recorder.count} tests in {runtime:.3f}s\n".format(
-            recorder=recorder, runtime=runtime,
+        count = recorder.count
+        yield "Ran {count} test{s} in {runtime:.3f}s\n".format(
+            count=count, runtime=runtime, s="s" if count != 1 else "",
         )
         yield "\n"
         if recorder.wasSuccessful():
-            yield "{Style.BRIGHT}{Fore.GREEN}PASSED{Style.RESET_ALL}".format(
-                Fore=Fore, Style=Style,
-            )
+            yield self._passed
         else:
-            yield "{Style.BRIGHT}{Fore.RED}FAILED{Style.RESET_ALL}".format(
-                Fore=Fore, Style=Style,
-            )
+            yield self._failed
 
         if recorder.count:
             yield " ("
@@ -144,20 +168,14 @@ class Outputter(object):
                 "\n",
                 "=" * self.line_width,
                 "\n",
-                "[ERROR]\n",
-                format_exc(exc_info),
+                self.ERROR,
                 "\n",
                 fully_qualified_name(test.__class__),
                 ".",
                 test._testMethodName,
             ],
         )
-        return self.format_line(
-            test,
-            "{Style.BRIGHT}{Fore.RED}[ERROR]{Style.RESET_ALL}".format(
-                Fore=Fore, Style=Style,
-            ),
-        )
+        return self.format_line(test, self._error)
 
     def test_failed(self, test, exc_info):
         self._after.extend(
@@ -165,7 +183,7 @@ class Outputter(object):
                 "\n",
                 "=" * self.line_width,
                 "\n",
-                "[FAIL]\n",
+                self.FAIL,
                 format_exc(exc_info),
                 "\n",
                 fully_qualified_name(test.__class__),
@@ -173,12 +191,7 @@ class Outputter(object):
                 test._testMethodName,
             ],
         )
-        return self.format_line(
-            test,
-            "{Style.BRIGHT}{Fore.RED}[FAIL]{Style.RESET_ALL}".format(
-                Fore=Fore, Style=Style,
-            ),
-        )
+        return self.format_line(test, self._fail)
 
     def test_skipped(self, test, reason):
         self._after.extend(
@@ -186,7 +199,8 @@ class Outputter(object):
                 "\n",
                 "=" * self.line_width,
                 "\n",
-                "[SKIPPED]\n",
+                self.SKIPPED,
+                "\n",
                 reason,
                 "\n",
                 fully_qualified_name(test.__class__),
@@ -194,20 +208,10 @@ class Outputter(object):
                 test._testMethodName,
             ],
         )
-        return self.format_line(
-            test,
-            "{Style.BRIGHT}{Fore.BLUE}[SKIPPED]{Style.RESET_ALL}".format(
-                Fore=Fore, Style=Style,
-            ),
-        )
+        return self.format_line(test, self._skipped)
 
     def test_succeeded(self, test):
-        return self.format_line(
-            test,
-            "{Style.BRIGHT}{Fore.GREEN}[OK]{Style.RESET_ALL}".format(
-                Fore=Fore, Style=Style,
-            ),
-        )
+        return self.format_line(test, self._ok)
 
     def format_line(self, test, result):
         before = "{indent}{indent}{test._testMethodName} ...".format(
