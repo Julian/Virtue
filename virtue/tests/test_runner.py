@@ -94,6 +94,21 @@ class TestRunOutput(unittest.TestCase):
             )
         )
 
+    def test_single_test(self):
+        self.assertOutputIs(
+            tests=["virtue.tests.samples.one_successful_test"],
+            expected="""
+            virtue.tests.samples.one_successful_test
+              Foo
+                test_foo ...                    [OK]
+
+            ----------------------------------------
+            Ran 1 test in 0.000s
+
+            PASSED (successes=1)
+            """
+        )
+
     def test_empty_run(self):
         self.assertOutputIs(
             tests=[],
