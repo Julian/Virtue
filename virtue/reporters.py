@@ -1,5 +1,5 @@
 from time import time
-from traceback import format_exc
+from traceback import format_exception
 import sys
 
 from twisted.python.reflect import fullyQualifiedName as fully_qualified_name
@@ -72,6 +72,15 @@ class Outputter(object):
     FAILED, PASSED = "FAILED", "PASSED"
     ERROR, FAIL, OK, SKIPPED = "[ERROR]", "[FAIL]", "[OK]", "[SKIPPED]"
 
+    _COLORS = [
+        ("_error", "RED", ERROR),
+        ("_fail", "RED", FAIL),
+        ("_failed", "RED", FAILED),
+        ("_ok", "GREEN", OK),
+        ("_passed", "GREEN", PASSED),
+        ("_skipped", "BLUE", SKIPPED),
+    ]
+
     def __init__(self, colored=True, indent=" " * 2, line_width=120):
         self.indent = indent
         self.line_width = line_width
@@ -79,24 +88,15 @@ class Outputter(object):
         if colored:
             from colorama import Fore, Style
             message = "{Style.BRIGHT}{color}{text}{Style.RESET_ALL}"
-            for attr, color, text in [
-                ("_error", Fore.RED, self.ERROR),
-                ("_fail", Fore.RED, self.FAIL),
-                ("_failed", Fore.RED, self.FAILED),
-                ("_ok", Fore.GREEN, self.OK),
-                ("_passed", Fore.GREEN, self.PASSED),
-                ("_skipped", Fore.BLUE, self.SKIPPED),
-            ]:
+            for attr, color, text in self._COLORS:
                 setattr(
                     self, attr, message.format(
-                        Style=Style, color=color, text=text,
+                        Style=Style, color=getattr(Fore, color), text=text,
                     )
                 )
         else:
-            self._error = self.ERROR
-            self._failed = self.FAILED
-            self._passed = self.PASSED
-            self._skipped = self.SKIPPED
+            for attr, _, text in self._COLORS:
+                setattr(self, attr, text)
 
         self._after = []
 
@@ -170,9 +170,9 @@ class Outputter(object):
                 "\n",
                 self.ERROR,
                 "\n",
-                fully_qualified_name(test.__class__),
-                ".",
-                test._testMethodName,
+            ] + format_exception(*exc_info) + [
+                "\n",
+                _test_name(test),
             ],
         )
         return self.format_line(test, self._error)
@@ -184,11 +184,10 @@ class Outputter(object):
                 "=" * self.line_width,
                 "\n",
                 self.FAIL,
-                format_exc(exc_info),
                 "\n",
-                fully_qualified_name(test.__class__),
-                ".",
-                test._testMethodName,
+            ] + format_exception(*exc_info) + [
+                "\n",
+                _test_name(test),
             ],
         )
         return self.format_line(test, self._fail)
@@ -214,8 +213,8 @@ class Outputter(object):
         return self.format_line(test, self._ok)
 
     def format_line(self, test, result):
-        before = "{indent}{indent}{test._testMethodName} ...".format(
-            indent=self.indent, test=test,
+        before = "{indent}{indent}{name} ...".format(
+            indent=self.indent, name=test._testMethodName,
         )
         space = self.line_width - len(before) - len(result)
         return before + " " * space + result + "\n"
@@ -264,3 +263,16 @@ class Recorder(object):
 
     def wasSuccessful(self):
         return not (self.errors or self.failures or self.unexpected_successes)
+
+
+def _test_name(test):
+    """
+    Retrieve the name of the given test.
+
+    :argument TestCase test: a test case instance
+
+    """
+
+    return ".".join(
+        (fully_qualified_name(test.__class__), test._testMethodName),
+    )

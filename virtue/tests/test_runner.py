@@ -41,6 +41,59 @@ class TestRunOutput(unittest.TestCase):
                 "\n    ".join(ndiff(got.splitlines(), dedented.splitlines()))
             )
 
+    def test_unsuccessful_run(self):
+        from virtue.tests.samples import two_unsuccessful_tests
+        self.assertOutputIs(
+            tests=[
+                "virtue.tests.samples.one_successful_test",
+                "virtue.tests.samples.two_unsuccessful_tests",
+            ],
+            expected="""
+            virtue.tests.samples.one_successful_test
+              Foo
+                test_foo ...                    [OK]
+            virtue.tests.samples.two_unsuccessful_tests
+              Bar
+                test_bar ...                    [OK]
+                test_foo ...                  [FAIL]
+              Foo
+                test_bar ...                  [FAIL]
+                test_foo ...                    [OK]
+
+            ========================================
+            [FAIL]
+            Traceback (most recent call last):
+              File "{unittest.case.__file__}", line 329, in run
+                testMethod()
+              File "{two_unsuccessful_tests.__file__}", line 14, in test_foo
+                self.fail("I fail too.")
+              File "{unittest.case.__file__}", line 410, in fail
+                raise self.failureException(msg)
+            AssertionError: I fail too.
+
+            virtue.tests.samples.two_unsuccessful_tests.Bar.test_foo
+            ========================================
+            [FAIL]
+            Traceback (most recent call last):
+              File "{unittest.case.__file__}", line 329, in run
+                testMethod()
+              File "{two_unsuccessful_tests.__file__}", line 9, in test_bar
+                self.fail("I fail.")
+              File "{unittest.case.__file__}", line 410, in fail
+                raise self.failureException(msg)
+            AssertionError: I fail.
+
+            virtue.tests.samples.two_unsuccessful_tests.Foo.test_bar
+            ----------------------------------------
+            Ran 5 tests in 0.000s
+
+            FAILED (successes=3, failures=2)
+            """.format(
+                unittest=unittest,
+                two_unsuccessful_tests=two_unsuccessful_tests,
+            )
+        )
+
     def test_empty_run(self):
         self.assertOutputIs(
             tests=[],
