@@ -182,10 +182,10 @@ class Recorder(object):
         pass
 
     def addError(self, test, exc_info):
-        self.errors.append(test)
+        self.errors.append((test, exc_info))
 
     def addFailure(self, test, exc_info):
-        self.failures.append(test)
+        self.failures.append((test, exc_info))
 
     def addSkip(self, test, reason):
         self.skips.append(test)

@@ -9,13 +9,13 @@ class TestRecorder(unittest.TestCase):
     def test_it_records_errors(self):
         error, exc_info = object(), object()
         self.recorder.addError(error, exc_info)
-        self.assertEqual(self.recorder.errors, [error])
+        self.assertEqual(self.recorder.errors, [(error, exc_info)])
         self.assertFalse(self.recorder.wasSuccessful())
 
     def test_it_records_failures(self):
         failure, exc_info = object(), object()
         self.recorder.addFailure(failure, exc_info)
-        self.assertEqual(self.recorder.failures, [failure])
+        self.assertEqual(self.recorder.failures, [(failure, exc_info)])
         self.assertFalse(self.recorder.wasSuccessful())
 
     def test_it_records_successes(self):
