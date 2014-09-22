@@ -1,5 +1,7 @@
+# -*- encoding: utf-8 -*-
 from difflib import ndiff
 from textwrap import dedent
+import re
 
 from virtue import runner
 from virtue.reporters import ComponentizedReporter, Outputter
@@ -35,14 +37,16 @@ class TestRunOutput(unittest.TestCase):
         if dedented.startswith("\n"):
             dedented = dedented[1:]
 
-        if got != dedented:
+        # I'm so sorry.
+        globbed = re.escape(dedented).replace(re.escape("•"), ".*")
+
+        if re.search(globbed, got) is None:
             self.fail(
                 "\n    " +
                 "\n    ".join(ndiff(got.splitlines(), dedented.splitlines()))
             )
 
     def test_unsuccessful_run(self):
-        from virtue.tests.samples import two_unsuccessful_tests
         self.assertOutputIs(
             tests=[
                 "virtue.tests.samples.one_successful_test",
@@ -63,11 +67,11 @@ class TestRunOutput(unittest.TestCase):
             ========================================
             [FAIL]
             Traceback (most recent call last):
-              File "{unittest.case.__file__}", line 329, in run
+              File "•unittest/case.py•", line 329, in run
                 testMethod()
-              File "{two_unsuccessful_tests.__file__}", line 14, in test_foo
+              File "•virtue/tests/samples/two_unsuccessful_tests.py•", line 14, in test_foo
                 self.fail("I fail too.")
-              File "{unittest.case.__file__}", line 410, in fail
+              File "•unittest/case.py•", line 410, in fail
                 raise self.failureException(msg)
             AssertionError: I fail too.
 
@@ -75,11 +79,11 @@ class TestRunOutput(unittest.TestCase):
             ========================================
             [FAIL]
             Traceback (most recent call last):
-              File "{unittest.case.__file__}", line 329, in run
+              File "•unittest/case.py•", line 329, in run
                 testMethod()
-              File "{two_unsuccessful_tests.__file__}", line 9, in test_bar
+              File "•virtue/tests/samples/two_unsuccessful_tests.py•", line 9, in test_bar
                 self.fail("I fail.")
-              File "{unittest.case.__file__}", line 410, in fail
+              File "•unittest/case.py•", line 410, in fail
                 raise self.failureException(msg)
             AssertionError: I fail.
 
@@ -88,10 +92,7 @@ class TestRunOutput(unittest.TestCase):
             Ran 5 tests in 0.000s
 
             FAILED (successes=3, failures=2)
-            """.format(
-                unittest=unittest,
-                two_unsuccessful_tests=two_unsuccessful_tests,
-            )
+            """
         )
 
     def test_single_test(self):
