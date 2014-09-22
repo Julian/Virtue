@@ -2,66 +2,8 @@ from time import time
 from traceback import format_exception
 import sys
 
+from characteristic import Attribute, attributes
 from twisted.python.reflect import fullyQualifiedName as fully_qualified_name
-
-
-class ComponentizedReporter(object):
-
-    shouldStop = False
-
-    def __init__(
-        self, outputter=None, recorder=None, stream=sys.stdout, time=time,
-    ):
-        if outputter is None:
-            outputter = Outputter()
-        if recorder is None:
-            recorder = Recorder()
-
-        self.outputter = outputter
-        self.recorder = recorder
-        self.stream = stream
-        self._time = time
-
-    def startTestRun(self):
-        self._start_time = self._time()
-        self.recorder.startTestRun()
-        self.stream.writelines(self.outputter.run_started() or "")
-
-    def stopTestRun(self):
-        self.recorder.stopTestRun()
-        runtime = self._time() - self._start_time
-        self.stream.writelines(
-            self.outputter.run_stopped(self.recorder, runtime) or ""
-        )
-
-    def startTest(self, test):
-        self.stream.writelines(self.outputter.test_started(test) or "")
-
-    def stopTest(self, test):
-        self.stream.writelines(self.outputter.test_stopped(test) or "")
-
-    def addError(self, test, exc_info):
-        self.recorder.addError(test, exc_info)
-        self.stream.writelines(
-            self.outputter.test_errored(test, exc_info) or ""
-        )
-
-    def addFailure(self, test, exc_info):
-        self.recorder.addFailure(test, exc_info)
-        self.stream.writelines(
-            self.outputter.test_failed(test, exc_info) or ""
-        )
-
-    def addSkip(self, test, reason):
-        self.recorder.addSkip(test, reason)
-        self.stream.writelines(self.outputter.test_skipped(test, reason) or "")
-
-    def addSuccess(self, test):
-        self.recorder.addSuccess(test)
-        self.stream.writelines(self.outputter.test_succeeded(test) or "")
-
-    def wasSuccessful(self):
-        return self.recorder.wasSuccessful()
 
 
 class Outputter(object):
@@ -122,23 +64,16 @@ class Outputter(object):
         if recorder.count:
             yield " ("
             summary = []
-
-            successes = len(recorder.successes)
-            if successes:
-                summary.append("successes=" + str(successes))
-            skips = len(recorder.skips)
-            if skips:
-                summary.append("skips=" + str(skips))
-            failures = len(recorder.failures)
-            if failures:
-                summary.append("failures=" + str(failures))
-            errors = len(recorder.errors)
-            if errors:
-                summary.append("errors=" + str(errors))
-            unexpected_successes = len(recorder.unexpected_successes)
-            if unexpected_successes:
-                summary.append("unexpected_successes=" + str(unexpected_successes))
-
+            for attr in (
+                "successes",
+                "skips",
+                "failures",
+                "errors",
+                "unexpected_successes",
+            ):
+                subcount = len(getattr(recorder, attr))
+                if subcount:
+                    summary.append("{0}={1}".format(attr, subcount))
             yield ", ".join(summary)
             yield ")"
 
@@ -220,14 +155,14 @@ class Outputter(object):
         return before + " " * space + result + "\n"
 
 
+@attributes(
+    [
+        Attribute(name=name, default_factory=list) for name in (
+            "errors", "failures", "skips", "successes", "unexpected_successes",
+        )
+    ],
+)
 class Recorder(object):
-    def __init__(self):
-        self.errors = []
-        self.failures = []
-        self.skips = []
-        self.successes = []
-        self.unexpected_successes = []
-
     @property
     def count(self):
         return sum(
@@ -263,6 +198,62 @@ class Recorder(object):
 
     def wasSuccessful(self):
         return not (self.errors or self.failures or self.unexpected_successes)
+
+
+@attributes(
+    [
+        Attribute(name="outputter", default_factory=Outputter),
+        Attribute(
+            name="recorder", default_factory=Recorder, exclude_from_repr=True,
+        ),
+        Attribute(name="stream", default_value=sys.stdout),
+        Attribute(name="_time", default_value=time, exclude_from_repr=True),
+    ],
+)
+class ComponentizedReporter(object):
+
+    shouldStop = False
+
+    def startTestRun(self):
+        self._start_time = self._time()
+        self.recorder.startTestRun()
+        self.stream.writelines(self.outputter.run_started() or "")
+
+    def stopTestRun(self):
+        self.recorder.stopTestRun()
+        runtime = self._time() - self._start_time
+        self.stream.writelines(
+            self.outputter.run_stopped(self.recorder, runtime) or ""
+        )
+
+    def startTest(self, test):
+        self.stream.writelines(self.outputter.test_started(test) or "")
+
+    def stopTest(self, test):
+        self.stream.writelines(self.outputter.test_stopped(test) or "")
+
+    def addError(self, test, exc_info):
+        self.recorder.addError(test, exc_info)
+        self.stream.writelines(
+            self.outputter.test_errored(test, exc_info) or ""
+        )
+
+    def addFailure(self, test, exc_info):
+        self.recorder.addFailure(test, exc_info)
+        self.stream.writelines(
+            self.outputter.test_failed(test, exc_info) or ""
+        )
+
+    def addSkip(self, test, reason):
+        self.recorder.addSkip(test, reason)
+        self.stream.writelines(self.outputter.test_skipped(test, reason) or "")
+
+    def addSuccess(self, test):
+        self.recorder.addSuccess(test)
+        self.stream.writelines(self.outputter.test_succeeded(test) or "")
+
+    def wasSuccessful(self):
+        return self.recorder.wasSuccessful()
 
 
 def _test_name(test):
