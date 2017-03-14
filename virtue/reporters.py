@@ -2,8 +2,9 @@ from time import time
 from traceback import format_exception
 import sys
 
-from characteristic import Attribute, attributes
+from pyrsistent import v
 from twisted.python.reflect import fullyQualifiedName as fully_qualified_name
+import attr
 
 
 class Outputter(object):
@@ -155,14 +156,16 @@ class Outputter(object):
         return before + " " * space + result + "\n"
 
 
-@attributes(
-    [
-        Attribute(name=name, default_factory=list) for name in (
-            "errors", "failures", "skips", "successes", "unexpected_successes",
-        )
-    ],
-)
+
+@attr.s
 class Recorder(object):
+
+    errors = attr.ib(default=v())
+    failures = attr.ib(default=v())
+    skips = attr.ib(default=v())
+    successes = attr.ib(default=v())
+    unexpected_successes = attr.ib(default=v())
+
     @property
     def count(self):
         return sum(
@@ -182,35 +185,31 @@ class Recorder(object):
         pass
 
     def addError(self, test, exc_info):
-        self.errors.append((test, exc_info))
+        self.errors = self.errors.append((test, exc_info))
 
     def addFailure(self, test, exc_info):
-        self.failures.append((test, exc_info))
+        self.failures = self.failures.append((test, exc_info))
 
     def addSkip(self, test, reason):
-        self.skips.append(test)
+        self.skips = self.skips.append(test)
 
     def addSuccess(self, test):
-        self.successes.append(test)
+        self.successes = self.successes.append(test)
 
     def addUnexpectedSuccess(self, test):
-        self.unexpected_successes.append(test)
+        self.unexpected_successes = self.unexpected_successes.append(test)
 
     def wasSuccessful(self):
         return not (self.errors or self.failures or self.unexpected_successes)
 
 
-@attributes(
-    [
-        Attribute(name="outputter", default_factory=Outputter),
-        Attribute(
-            name="recorder", default_factory=Recorder, exclude_from_repr=True,
-        ),
-        Attribute(name="stream", default_value=sys.stdout),
-        Attribute(name="_time", default_value=time, exclude_from_repr=True),
-    ],
-)
+@attr.s
 class ComponentizedReporter(object):
+
+    outputter = attr.ib(default=attr.Factory(Outputter))
+    recorder = attr.ib(default=attr.Factory(Recorder), repr=False)
+    stream = attr.ib(default=sys.stdout)
+    _time = attr.ib(default=time, repr=False)
 
     shouldStop = False
 

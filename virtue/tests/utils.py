@@ -1,19 +1,23 @@
-from unittest import TestResult
+import attr
 
 
+@attr.s(cmp=False)
 class ExpectedResult(object):
     """
     A TestResult comparator.
 
     """
 
-    def __init__(self, testsRun):
-        self.testsRun = testsRun
+    errors = attr.ib(default=0)
+    failures = attr.ib(default=0)
+    testsRun = attr.ib(default=0)
 
     def __eq__(self, other):
-        if not isinstance(other, TestResult):
-            return NotImplemented
-        return self.testsRun == other.testsRun
+        return (
+            self.errors == len(other.errors) and
+            self.failures == len(other.failures) and
+            self.testsRun == other.testsRun
+        )
 
     def __ne__(self, other):
         return not self == other

@@ -25,7 +25,12 @@ classifiers = [
     "Programming Language :: Python :: Implementation :: PyPy"
 ]
 
-install_requires = ["characteristic>=14.1.0", "colorama", "Twisted>=14.0.0"]
+install_requires = [
+    "attrs>=16.3.0",
+    "colorama",
+    "pyrsistent",
+    "Twisted>=14.0.0",
+]
 if PY26:
     install_requires.extend(["argparse", "unittest2"])
 
