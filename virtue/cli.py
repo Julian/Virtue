@@ -2,6 +2,10 @@ import argparse
 import sys
 
 from twisted.python.reflect import namedAny as named_any
+
+# Sigh. http://twistedmatrix.com/trac/ticket/8267
+import twisted.trial.unittest
+
 import twisted.trial.reporter
 
 from virtue import __version__
