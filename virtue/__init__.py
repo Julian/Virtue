@@ -1,1 +1,2 @@
-__version__ = "0.2.0"
+from virtue._version import __version__
+

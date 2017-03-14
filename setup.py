@@ -2,9 +2,6 @@ import os
 
 from setuptools import find_packages, setup
 
-from virtue import __version__
-from virtue.compat import PY26
-
 
 BIN_DIR = os.path.join(os.path.dirname(__file__), "bin")
 
@@ -25,26 +22,29 @@ classifiers = [
     "Programming Language :: Python :: Implementation :: PyPy"
 ]
 
-install_requires = [
-    "attrs>=16.3.0",
-    "colorama",
-    "pyrsistent",
-    "Twisted>=14.0.0",
-]
-if PY26:
-    install_requires.extend(["argparse", "unittest2"])
-
 setup(
     name="virtue",
-    version=__version__,
-    packages=find_packages(),
-    scripts=[os.path.join(BIN_DIR, bin) for bin in os.listdir(BIN_DIR)],
-    install_requires=install_requires,
+    url="https://github.com/Julian/Virtue",
+
+    description="A test runner with virtue",
+    long_description=long_description,
+
     author="Julian Berman",
     author_email="Julian@GrayVines.com",
+
+    packages=find_packages(),
+    scripts=[os.path.join(BIN_DIR, bin) for bin in os.listdir(BIN_DIR)],
+
+    setup_requires=["vcversioner>=2.16.0.0"],
+    vcversioner={"version_module_paths": ["virtue/_version.py"]},
+
+    install_requires=[
+        "attrs>=16.3.0",
+        "colorama",
+        "pyrsistent",
+        "Twisted>=14.0.0",
+    ],
+
     classifiers=classifiers,
-    description="A test runner with virtue",
     license="MIT",
-    long_description=long_description,
-    url="https://github.com/Julian/Virtue",
 )
