@@ -14,6 +14,28 @@ class TestRun(unittest.TestCase):
         result = runner.run(tests=["virtue.tests.samples.one_successful_test"])
         self.assertEqual(result, ExpectedResult(testsRun=1))
 
+    def test_it_can_stop_short(self):
+        """
+        Ooo, I stopped short.
+
+        """
+
+        result = runner.run(
+            tests=["virtue.tests.samples.two_unsuccessful_tests"],
+            stop_after=1,
+        )
+        self.assertEqual(
+            result,
+            ExpectedResult(failures=1, testsRun=result.testsRun),
+        )
+
+    def test_it_can_stop_short_combined_with_errors(self):
+        result = runner.run(
+            tests=["virtue.tests.samples.failures_and_errors"],
+            stop_after=3,
+        )
+        self.assertEqual(len(result.failures + result.errors), 3)
+
     def test_it_allows_specifying_a_result(self):
         result = unittest.TestResult()
         runner.run(
