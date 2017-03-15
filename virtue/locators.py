@@ -80,7 +80,7 @@ class ObjectLocator(object):
             if is_aliased:
                 cls, method_name = obj.im_class, obj.__name__
 
-            return [AttributeLoader(cls=cls, attr=method_name)]
+            return [AttributeLoader(cls=cls, attribute=method_name)]
         return self.locate_in(obj)
 
     def locate_in(self, obj):
@@ -122,9 +122,9 @@ class ObjectLocator(object):
 
         """
 
-        for attr in dir(module):
-            value = getattr(module, attr, None)
-            if isclass(value) and self.is_test_class(attr, value):
+        for attribute in dir(module):
+            value = getattr(module, attribute, None)
+            if isclass(value) and self.is_test_class(attribute, value):
                 for test_case in self.locate_in_class(value):
                     yield test_case
 
@@ -134,7 +134,7 @@ class ObjectLocator(object):
 
         """
 
-        for attr in dir(cls):
-            value = getattr(cls, attr, None)
-            if callable(value) and self.is_test_method(attr, value):
-                yield AttributeLoader(cls=cls, attr=attr)
+        for attribute in dir(cls):
+            value = getattr(cls, attribute, None)
+            if callable(value) and self.is_test_method(attribute, value):
+                yield AttributeLoader(cls=cls, attribute=attribute)

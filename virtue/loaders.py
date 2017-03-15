@@ -15,10 +15,10 @@ class AttributeLoader(object):
     """
 
     cls = attr.ib()
-    attr = attr.ib()
+    attribute = attr.ib()
 
     def load(self):
-        return [self.cls(self.attr)]
+        return [self.cls(self.attribute)]
 
 
 @attr.s

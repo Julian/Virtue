@@ -14,14 +14,14 @@ from virtue.runner import run
 
 
 _BUILT_IN_REPORTERS = {
-    "bwverbose" : twisted.trial.reporter.VerboseTextReporter,
-    "default" : ComponentizedReporter,
-    "subunit" : twisted.trial.reporter.SubunitReporter,
-    "summary" : twisted.trial.reporter.MinimalReporter,
-    "text" : twisted.trial.reporter.TextReporter,
-    "timing" : twisted.trial.reporter.TimingTextReporter,
-    "tree" : twisted.trial.reporter.TreeReporter,
-    "verbose" : twisted.trial.reporter.VerboseTextReporter,
+    "bwverbose": twisted.trial.reporter.VerboseTextReporter,
+    "default": ComponentizedReporter,
+    "subunit": twisted.trial.reporter.SubunitReporter,
+    "summary": twisted.trial.reporter.MinimalReporter,
+    "text": twisted.trial.reporter.TextReporter,
+    "timing": twisted.trial.reporter.TimingTextReporter,
+    "tree": twisted.trial.reporter.TreeReporter,
+    "verbose": twisted.trial.reporter.VerboseTextReporter,
 }
 
 

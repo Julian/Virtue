@@ -31,15 +31,15 @@ class Outputter(object):
         if colored:
             from colorama import Fore, Style
             message = "{Style.BRIGHT}{color}{text}{Style.RESET_ALL}"
-            for attr, color, text in self._COLORS:
+            for attribute, color, text in self._COLORS:
                 setattr(
-                    self, attr, message.format(
+                    self, attribute, message.format(
                         Style=Style, color=getattr(Fore, color), text=text,
                     )
                 )
         else:
-            for attr, _, text in self._COLORS:
-                setattr(self, attr, text)
+            for attribute, _, text in self._COLORS:
+                setattr(self, attribute, text)
 
         self._after = []
 
@@ -65,16 +65,16 @@ class Outputter(object):
         if recorder.count:
             yield " ("
             summary = []
-            for attr in (
+            for attribute in (
                 "successes",
                 "skips",
                 "failures",
                 "errors",
                 "unexpected_successes",
             ):
-                subcount = len(getattr(recorder, attr))
+                subcount = len(getattr(recorder, attribute))
                 if subcount:
-                    summary.append("{0}={1}".format(attr, subcount))
+                    summary.append("{0}={1}".format(attribute, subcount))
             yield ", ".join(summary)
             yield ")"
 
@@ -154,7 +154,6 @@ class Outputter(object):
         )
         space = self.line_width - len(before) - len(result)
         return before + " " * space + result + "\n"
-
 
 
 @attr.s
@@ -259,7 +258,11 @@ def _test_name(test):
     """
     Retrieve the name of the given test.
 
-    :argument TestCase test: a test case instance
+    Arguments:
+
+        test (TestCase):
+
+            a test case instance
 
     """
 

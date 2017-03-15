@@ -25,7 +25,7 @@ class TestObjectLocator(unittest.TestCase):
         )
         self.assertEqual(
             list(locator.locate_by_name(this_fully_qualified_name)),
-            [AttributeLoader(cls=self.__class__, attr=this_name)],
+            [AttributeLoader(cls=self.__class__, attribute=this_name)],
         )
 
     def test_it_can_locate_aliased_methods_directly_by_name(self):
@@ -36,7 +36,7 @@ class TestObjectLocator(unittest.TestCase):
         )
         self.assertEqual(
             list(locator.locate_by_name(aliased_fully_qualified_name)),
-            [AttributeLoader(cls=self.__class__, attr=this_name)],
+            [AttributeLoader(cls=self.__class__, attribute=this_name)],
         )
 
     def test_it_finds_methods_on_test_cases(self):
@@ -46,14 +46,16 @@ class TestObjectLocator(unittest.TestCase):
 
         class ASampleTestCase(unittest.TestCase):
             def not_a_test(self): pass
+
             def TEST1(self): pass
+
             def TEST_2(self): pass
 
         cases = locator.locate_in(ASampleTestCase)
         self.assertEqual(
-            sorted(cases, key=attrgetter("attr")), [
-                AttributeLoader(cls=ASampleTestCase, attr="TEST1"),
-                AttributeLoader(cls=ASampleTestCase, attr="TEST_2"),
+            sorted(cases, key=attrgetter("attribute")), [
+                AttributeLoader(cls=ASampleTestCase, attribute="TEST1"),
+                AttributeLoader(cls=ASampleTestCase, attribute="TEST_2"),
             ],
         )
 
@@ -62,30 +64,33 @@ class TestObjectLocator(unittest.TestCase):
 
         class ASampleTestCase(unittest.TestCase):
             def not_a_test(self): pass
+
             def TEST1(self): pass
+
             def test_foo(self): pass
+
             def testBar(self): pass
 
         cases = locator.locate_in(ASampleTestCase)
         self.assertEqual(
-            sorted(cases, key=attrgetter("attr")), [
-                AttributeLoader(cls=ASampleTestCase, attr="testBar"),
-                AttributeLoader(cls=ASampleTestCase, attr="test_foo"),
+            sorted(cases, key=attrgetter("attribute")), [
+                AttributeLoader(cls=ASampleTestCase, attribute="testBar"),
+                AttributeLoader(cls=ASampleTestCase, attribute="test_foo"),
             ],
         )
 
     def test_it_finds_test_case_classes_on_modules(self):
         locator = locators.ObjectLocator(
-            is_test_class=(lambda attr, value : attr != "Foo"),
+            is_test_class=(lambda attr, value: attr != "Foo"),
         )
         from virtue.tests.samples import module_for_TestObjectLocator as module
         cases = locator.locate_in(module)
         self.assertEqual(
-            sorted(cases, key=attrgetter("attr")), [
-                AttributeLoader(cls=module.Baz, attr="test_bar"),
-                AttributeLoader(cls=module.Baz, attr="test_baz"),
-                AttributeLoader(cls=module.Bar, attr="test_foo"),
-                AttributeLoader(cls=module.OldStyle, attr="test_old"),
+            sorted(cases, key=attrgetter("attribute")), [
+                AttributeLoader(cls=module.Baz, attribute="test_bar"),
+                AttributeLoader(cls=module.Baz, attribute="test_baz"),
+                AttributeLoader(cls=module.Bar, attribute="test_foo"),
+                AttributeLoader(cls=module.OldStyle, attribute="test_old"),
             ],
         )
 
@@ -94,14 +99,14 @@ class TestObjectLocator(unittest.TestCase):
         from virtue.tests.samples import module_for_TestObjectLocator as module
         cases = locator.locate_in(module)
         self.assertEqual(
-            sorted(cases, key=attrgetter("attr")), [
-                AttributeLoader(cls=module.Foo, attr="test_foo"),
+            sorted(cases, key=attrgetter("attribute")), [
+                AttributeLoader(cls=module.Foo, attribute="test_foo"),
             ],
         )
 
     def test_it_finds_test_cases_recursively_in_packages(self):
         locator = locators.ObjectLocator(
-            is_test_module=(lambda name : name != "foo"),
+            is_test_module=(lambda name: name != "foo"),
         )
         package = self.create_package_with_tests(locator)
         cases = locator.locate_in(package)

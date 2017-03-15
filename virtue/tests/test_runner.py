@@ -28,7 +28,7 @@ class TestRunOutput(unittest.TestCase):
         reporter = ComponentizedReporter(
             outputter=Outputter(colored=False, line_width=40),
             stream=StringIO(),
-            time=lambda : 0,
+            time=lambda: 0,
         )
         runner.run(reporter=reporter, **kwargs)
         got = reporter.stream.getvalue()
