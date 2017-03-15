@@ -1,6 +1,9 @@
 import itertools
 
+import attr
 
+
+@attr.s
 class AttributeLoader(object):
     """
     I load a test case by instantiating a class with a given attribute name.
@@ -11,56 +14,22 @@ class AttributeLoader(object):
 
     """
 
-    def __init__(self, cls, attr):
-        self.cls = cls
-        self.attr = attr
-
-    def __eq__(self, other):
-        if not isinstance(other, self.__class__):
-            return NotImplemented
-        return self.cls == other.cls and self.attr == other.attr
-
-    def __ne__(self, other):
-        if not isinstance(other, self.__class__):
-            return NotImplemented
-        return not self == other
-
-    def __repr__(self):
-        return (
-            "<{self.__class__.__name__} "
-            "cls={self.cls.__name__!r} attr={self.attr!r}>".format(self=self)
-        )
+    cls = attr.ib()
+    attr = attr.ib()
 
     def load(self):
         return [self.cls(self.attr)]
 
 
+@attr.s
 class ModuleLoader(object):
     """
     I load a test case by locating tests in the module with the given name.
 
     """
 
-    def __init__(self, locator, module):
-        self.locator = locator
-        self.module = module
-
-    def __eq__(self, other):
-        if not isinstance(other, self.__class__):
-            return NotImplemented
-        return self.locator == other.locator and self.module == other.module
-
-    def __ne__(self, other):
-        if not isinstance(other, self.__class__):
-            return NotImplemented
-        return not self == other
-
-    def __repr__(self):
-        return (
-            "<{self.__class__.__name__} module={self.module.name}>".format(
-                self=self,
-            )
-        )
+    locator = attr.ib(repr=False)
+    module = attr.ib()
 
     def load(self):
         class_loaders = self.locator.locate_in_module(self.module.load())

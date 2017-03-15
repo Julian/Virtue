@@ -30,7 +30,7 @@ class TestAttributeLoader(unittest.TestCase):
         loader = loaders.AttributeLoader(cls=self.__class__, attr="test_repr")
         self.assertEqual(
             repr(loader),
-            "<AttributeLoader cls='TestAttributeLoader' attr='test_repr'>",
+            "AttributeLoader(cls=<class 'virtue.tests.test_loaders.TestAttributeLoader'>, attr='test_repr')",
         )
 
 
@@ -70,4 +70,6 @@ class TestModuleLoader(unittest.TestCase):
     def test_repr(self):
         virtue = get_module("virtue")
         loader = loaders.ModuleLoader(locator=self.locator, module=virtue)
-        self.assertEqual(repr(loader), "<ModuleLoader module=virtue>")
+        self.assertEqual(
+            repr(loader), "ModuleLoader(module=PythonModule<'virtue'>)",
+        )

@@ -3,6 +3,7 @@ from inspect import isclass, ismethod, ismodule
 
 from twisted.python.modules import getModule as get_module
 from twisted.python.reflect import namedAny as named_any
+import attr
 
 from virtue.loaders import AttributeLoader, ModuleLoader
 
@@ -28,37 +29,37 @@ def inherits_from_TestCase(attr, cls):
     return issubclass(cls, TestCase)
 
 
+@attr.s
 class ObjectLocator(object):
     """
     I locate test cases on an object: a package, module or test class.
 
+    Arguments:
+
+        is_test_method (callable):
+
+            decide whether the provided object is a test method
+            or not. By default, callable objects whose names
+            (``__name__``\ s) start with ``test_`` are considered
+            test methods.
+
+        is_test_class (callable):
+
+            decide whether the provided object is a test
+            class or not. By default, objects inheriting from
+            `unittest.TestCase` are considered test cases.
+
+        is_test_module (callable):
+
+            decide whether the provided object is a test module
+            or not. By default, modules whose names start with
+            ``test_`` are considered to be test modules.
+
     """
 
-    def __init__(
-        self,
-        is_test_method=prefixed_by("test"),
-        is_test_class=inherits_from_TestCase,
-        is_test_module=prefixed_by("test_"),
-    ):
-        """
-        Initialize the object locator.
-
-        :argument callable is_test_method: decide whether the provided object
-            is a test method or not. By default, callable objects whose names
-            (``__name__``\ s) start with ``test_`` are considered test methods.
-        :argument callable is_test_class: decide whether the provided object
-            is a test class or not. By default, objects inheriting from
-            :class:`unittest.TestCase` are considered test cases.
-        :argument callable is_test_module: decide whether the provided object
-            is a test module or not. By default, modules whose names start with
-            ``test_`` are considered to be test modules.
-        :returns: an iterable of test loaders for the located tests
-
-        """
-
-        self.is_test_method = is_test_method
-        self.is_test_module = is_test_module
-        self.is_test_class = is_test_class
+    is_test_method = attr.ib(default=prefixed_by("test"), repr=False)
+    is_test_class = attr.ib(default=inherits_from_TestCase, repr=False)
+    is_test_module = attr.ib(default=prefixed_by("test_"), repr=False)
 
     def locate_by_name(self, name):
         """
