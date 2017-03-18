@@ -33,13 +33,14 @@ setup(
     author_email="Julian@GrayVines.com",
 
     packages=find_packages(),
-    scripts=[os.path.join(BIN_DIR, bin) for bin in os.listdir(BIN_DIR)],
+    entry_points={"console_scripts": ["virtue = virtue.cli:main"]},
 
     setup_requires=["vcversioner>=2.16.0.0"],
     vcversioner={"version_module_paths": ["virtue/_version.py"]},
 
     install_requires=[
         "attrs>=16.3.0",
+        "click",
         "colorama",
         "pyrsistent",
         "Twisted>=14.0.0",

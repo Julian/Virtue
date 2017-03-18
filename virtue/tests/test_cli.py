@@ -7,18 +7,21 @@ from virtue.compat import unittest
 
 
 class TestParser(unittest.TestCase):
+    def parse_args(self, argv):
+        return cli.main.make_context("virtue", argv).params
+
     def test_it_parses_out_tests(self):
-        arguments = cli.parse_args(["foo", "bar", "baz"])
-        self.assertEqual(arguments["tests"], ["foo", "bar", "baz"])
+        arguments = self.parse_args(["foo", "bar", "baz"])
+        self.assertEqual(list(arguments["tests"]), ["foo", "bar", "baz"])
 
     def test_it_retrieves_built_in_reporters_by_name(self):
-        arguments = cli.parse_args(["--reporter", "tree", "foo"])
+        arguments = self.parse_args(["--reporter", "tree", "foo"])
         self.assertIsInstance(arguments["reporter"], TreeReporter)
 
     reporter = object()
 
     def test_it_retrieves_other_reporters_by_fully_qualified_name(self):
-        arguments = cli.parse_args(
+        arguments = self.parse_args(
             ["--reporter", "virtue.tests.test_cli.TestParser.reporter", "abc"],
         )
         self.assertEqual(arguments["reporter"], self.reporter)
