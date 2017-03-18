@@ -26,6 +26,20 @@ class TestParser(unittest.TestCase):
         )
         self.assertEqual(arguments["reporter"], self.reporter)
 
+    def test_stop_after(self):
+        arguments = self.parse_args(["-xxx", "bar", "baz"])
+        self.assertEqual(
+            (arguments["stop_after"], list(arguments["tests"])),
+            (3, ["bar", "baz"]),
+        )
+
+    def test_stop_after_default(self):
+        arguments = self.parse_args(["-x", "bar", "baz"])
+        self.assertEqual(
+            (arguments["stop_after"], list(arguments["tests"])),
+            (1, ["bar", "baz"]),
+        )
+
 
 class TestMain(unittest.TestCase):
     # TODO: these write to stdout

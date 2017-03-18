@@ -47,6 +47,15 @@ class _Reporter(click.ParamType):
     help="the name of a reporter to use for outputting test results",
     type=_Reporter(),
 )
+@click.option(
+    "-x", "--stop-after",
+    default=None,
+    count=True,
+    help=(
+        "stop the test run after unsuccessful results. May be "
+        "repeated to stop after that many non-successes."
+    )
+)
 @click.argument("tests", nargs=-1)
 @click.pass_context
 def main(context, **kwargs):
