@@ -152,8 +152,11 @@ class Outputter(object):
         before = "{indent}{indent}{name} ...".format(
             indent=self.indent, name=test._testMethodName,
         )
-        space = self.line_width - len(before) - len(result)
-        return before + " " * space + result + "\n"
+        return self._pad_center(left=before, right=result) + "\n"
+
+    def _pad_center(self, left, right):
+        space = self.line_width - len(left) - len(right)
+        return left + " " * space + right
 
 
 @attr.s
