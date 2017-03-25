@@ -4,15 +4,14 @@ from textwrap import dedent
 import re
 
 from virtue import runner
-from virtue.reporters import ComponentizedReporter, Outputter
+from virtue.reporters import ComponentizedReporter, Counter, Outputter
 from virtue.compat import StringIO, unittest
-from virtue.tests.utils import ExpectedResult
 
 
 class TestRun(unittest.TestCase):
     def test_it_runs_tests(self):
         result = runner.run(tests=["virtue.tests.samples.one_successful_test"])
-        self.assertEqual(result, ExpectedResult(testsRun=1))
+        self.assertEqual(result, Counter(successes=1))
 
     def test_it_can_stop_short(self):
         """
@@ -25,8 +24,7 @@ class TestRun(unittest.TestCase):
             stop_after=1,
         )
         self.assertEqual(
-            result,
-            ExpectedResult(failures=1, testsRun=result.testsRun),
+            result, Counter(failures=1, successes=result.successes),
         )
 
     def test_it_can_stop_short_combined_with_errors(self):
@@ -34,7 +32,7 @@ class TestRun(unittest.TestCase):
             tests=["virtue.tests.samples.failures_and_errors"],
             stop_after=3,
         )
-        self.assertEqual(len(result.failures + result.errors), 3)
+        self.assertEqual(result.failures + result.errors, 3)
 
     def test_it_allows_specifying_a_result(self):
         result = unittest.TestResult()
@@ -42,7 +40,7 @@ class TestRun(unittest.TestCase):
             tests=["virtue.tests.samples.one_successful_test"],
             reporter=result,
         )
-        self.assertEqual(result, ExpectedResult(testsRun=1))
+        self.assertEqual(result.testsRun, 1)
 
 
 class TestRunOutput(unittest.TestCase):

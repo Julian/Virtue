@@ -157,6 +157,41 @@ class Outputter(object):
 
 
 @attr.s
+class Counter(object):
+    """
+    A counter is a recorder that does not hold references to tests it sees.
+
+    """
+
+    errors = attr.ib(default=0)
+    failures = attr.ib(default=0)
+    successes = attr.ib(default=0)
+
+    shouldStop = False
+
+    @property
+    def count(self):
+        return sum(attr.astuple(self))
+
+    testsRun = count
+
+    def startTest(self, test):
+        pass
+
+    def stopTest(self, test):
+        pass
+
+    def addError(self, test, exc_info):
+        self.errors += 1
+
+    def addFailure(self, test, exc_info):
+        self.failures += 1
+
+    def addSuccess(self, test):
+        self.successes += 1
+
+
+@attr.s
 class Recorder(object):
 
     errors = attr.ib(default=v())
@@ -167,15 +202,7 @@ class Recorder(object):
 
     @property
     def count(self):
-        return sum(
-            len(tests) for tests in (
-                self.errors,
-                self.failures,
-                self.skips,
-                self.successes,
-                self.unexpected_successes,
-            )
-        )
+        return sum(len(tests) for tests in attr.astuple(self))
 
     def startTestRun(self):
         pass

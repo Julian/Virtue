@@ -2,6 +2,7 @@ import attr
 
 from virtue.compat import unittest
 from virtue.locators import ObjectLocator
+from virtue.reporters import Counter
 
 
 def run(tests=(), reporter=None, stop_after=None):
@@ -17,7 +18,7 @@ def run(tests=(), reporter=None, stop_after=None):
         reporter (Reporter):
 
             a `Reporter` to use for the run. If unprovided, the default
-            is to return a `unittest.TestResult` (which produces no
+            is to return a `virtue.reporters.Counter` (which produces no
             output).
 
         stop_after (int):
@@ -27,7 +28,7 @@ def run(tests=(), reporter=None, stop_after=None):
     """
 
     if reporter is None:
-        reporter = unittest.TestResult()
+        reporter = Counter()
     if stop_after is not None:
         reporter = _StopAfterWrapper(reporter=reporter, limit=stop_after)
 
@@ -45,7 +46,7 @@ def run(tests=(), reporter=None, stop_after=None):
     return reporter
 
 
-@attr.s
+@attr.s(cmp=False)
 class _StopAfterWrapper(object):
     """
     Wrap a reporter to stop after a specified number of non-successes.
@@ -56,6 +57,15 @@ class _StopAfterWrapper(object):
     _reporter = attr.ib()
 
     _seen = attr.ib(default=0)
+
+    def __eq__(self, other):
+        return self._reporter == other
+
+    def __ne__(self, other):
+        return not self == other
+
+    def __getattr__(self, attr):
+        return getattr(self._reporter, attr)
 
     def addError(self, *args, **kwargs):
         self._see_failure()
@@ -69,6 +79,3 @@ class _StopAfterWrapper(object):
         self._seen += 1
         if self._seen == self._limit:
             self.shouldStop = True
-
-    def __getattr__(self, attr):
-        return getattr(self._reporter, attr)
