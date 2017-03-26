@@ -203,6 +203,8 @@ class Recorder(object):
     successes = attr.ib(default=v())
     unexpected_successes = attr.ib(default=v())
 
+    shouldStop = False
+
     @property
     def count(self):
         return sum(len(tests) for tests in attr.astuple(self))
@@ -211,6 +213,12 @@ class Recorder(object):
         pass
 
     def stopTestRun(self):
+        pass
+
+    def startTest(self, test):
+        pass
+
+    def stopTest(self, test):
         pass
 
     def addError(self, test, exc_info):
@@ -255,9 +263,11 @@ class ComponentizedReporter(object):
         )
 
     def startTest(self, test):
+        self.recorder.startTest(test)
         self.stream.writelines(self.outputter.test_started(test) or "")
 
     def stopTest(self, test):
+        self.recorder.stopTest(test)
         self.stream.writelines(self.outputter.test_stopped(test) or "")
 
     def addError(self, test, exc_info):

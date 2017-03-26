@@ -3,8 +3,13 @@ from difflib import ndiff
 from textwrap import dedent
 import re
 
+from pyrsistent import v
+
 from virtue import runner
-from virtue.reporters import ComponentizedReporter, Counter, Outputter
+from virtue.loaders import AttributeLoader
+from virtue.reporters import (
+    ComponentizedReporter, Counter, Outputter, Recorder,
+)
 from virtue.compat import StringIO, unittest
 
 
@@ -34,13 +39,28 @@ class TestRun(unittest.TestCase):
         )
         self.assertEqual(result.failures + result.errors, 3)
 
-    def test_it_allows_specifying_a_result(self):
+    def test_unittest_TestResult(self):
         result = unittest.TestResult()
         runner.run(
             tests=["virtue.tests.samples.one_successful_test"],
             reporter=result,
         )
         self.assertEqual(result.testsRun, 1)
+
+    def test_Recorder(self):
+        result = Recorder()
+        runner.run(
+            tests=["virtue.tests.samples.one_successful_test"],
+            reporter=result,
+        )
+        import virtue.tests.samples.one_successful_test
+        self.assertEqual(
+            result, Recorder(
+                successes=v(
+                    virtue.tests.samples.one_successful_test.Foo("test_foo"),
+                ),
+            ),
+        )
 
 
 class TestRunOutput(unittest.TestCase):
