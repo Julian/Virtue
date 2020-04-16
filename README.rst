@@ -2,6 +2,29 @@
 Virtue
 ======
 
+|PyPI| |Pythons| |CI| |Codecov| |ReadTheDocs|
+
+.. |PyPI| image:: https://img.shields.io/pypi/v/Virtue.svg
+  :alt: PyPI version
+  :target: https://pypi.org/project/Virtue/
+
+.. |Pythons| image:: https://img.shields.io/pypi/pyversions/Virtue.svg
+  :alt: Supported Python versions
+  :target: https://pypi.org/project/Virtue/
+
+.. |CI| image:: https://github.com/Julian/Virtue/workflows/CI/badge.svg
+  :alt: Build status
+  :target: https://github.com/Julian/Virtue/actions?query=workflow%3ACI
+
+.. |Codecov| image:: https://codecov.io/gh/Julian/Virtue/branch/master/graph/badge.svg
+  :alt: Codecov Code coverage
+  :target: https://codecov.io/gh/Julian/Virtue
+
+.. |ReadTheDocs| image:: https://readthedocs.org/projects/Virtue/badge/?version=stable&style=flat
+  :alt: ReadTheDocs status
+  :target: https://virtue.readthedocs.io/en/stable/
+
+
 ``virtue`` is a modern, extensible,
 `unittest <https://docs.python.org/2/library/unittest.html>`_ compliant
 test runner.
