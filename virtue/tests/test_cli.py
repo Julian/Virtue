@@ -2,13 +2,13 @@ import os
 
 from twisted.trial.reporter import TreeReporter
 
-from virtue import cli
+from virtue import _cli
 from virtue.compat import unittest
 
 
 class TestParser(unittest.TestCase):
     def parse_args(self, argv):
-        return cli.main.make_context("virtue", argv).params
+        return _cli.main.make_context("virtue", argv).params
 
     def test_it_parses_out_tests(self):
         arguments = self.parse_args(["foo", "bar", "baz"])
@@ -45,7 +45,7 @@ class TestMain(unittest.TestCase):
     # TODO: these write to stdout
     def test_it_exits_successfully_for_successful_runs(self):
         with self.assertRaises(SystemExit) as e:
-            cli.main(
+            _cli.main(
                 [
                     "--reporter", "summary",
                     "virtue.tests.samples.one_successful_test",
@@ -55,7 +55,7 @@ class TestMain(unittest.TestCase):
 
     def test_it_exits_unsuccessfully_for_unsuccessful_runs(self):
         with self.assertRaises(SystemExit) as e:
-            cli.main(
+            _cli.main(
                 [
                     "--reporter", "text",
                     "virtue.tests.samples.one_unsuccessful_test",
@@ -65,7 +65,7 @@ class TestMain(unittest.TestCase):
 
     def test_it_exits_unsuccessfully_for_unknown_reporters(self):
         with self.assertRaises(SystemExit) as e:
-            cli.main(
+            _cli.main(
                 [
                     "--reporter", "non-existent reporter",
                     "virtue.tests.samples.one_unsuccessful_test",
