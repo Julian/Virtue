@@ -80,7 +80,7 @@ class TestRunOutput(unittest.TestCase):
         # I'm so sorry.
         globbed = re.escape(dedented).replace(re.escape("•"), ".*")
 
-        if re.search(globbed, got) is None:
+        if re.search(globbed, got, re.DOTALL) is None:
             self.fail(
                 "\n    " +
                 "\n    ".join(ndiff(got.splitlines(), dedented.splitlines()))
@@ -106,24 +106,24 @@ class TestRunOutput(unittest.TestCase):
 
             ========================================
             [FAIL]
-            Traceback (most recent call last):
-              File "•unittest/case.py•", line 329, in run
-                testMethod()
+            Traceback (most recent call last):•
+              File "•unittest/case.py•", line •, in run•
+                •ethod()•
               File "•virtue/tests/samples/two_unsuccessful_tests.py•", line 14, in test_foo
                 self.fail("I fail too.")
-              File "•unittest/case.py•", line 410, in fail
+              File "•unittest/case.py•", line •, in fail
                 raise self.failureException(msg)
             AssertionError: I fail too.
 
             virtue.tests.samples.two_unsuccessful_tests.Bar.test_foo
             ========================================
             [FAIL]
-            Traceback (most recent call last):
-              File "•unittest/case.py•", line 329, in run
-                testMethod()
+            Traceback (most recent call last):•
+              File "•unittest/case.py•", line •, in run•
+                •ethod()•
               File "•virtue/tests/samples/two_unsuccessful_tests.py•", line 9, in test_bar
                 self.fail("I fail.")
-              File "•unittest/case.py•", line 410, in fail
+              File "•unittest/case.py•", line •, in fail
                 raise self.failureException(msg)
             AssertionError: I fail.
 
