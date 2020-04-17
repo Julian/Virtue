@@ -2,7 +2,10 @@ from unittest import TestCase
 from inspect import isclass, ismethod, ismodule
 
 from twisted.python.modules import getModule as get_module
-from twisted.python.reflect import namedAny as named_any
+from twisted.python.reflect import (
+    fullyQualifiedName as fully_qualified_name,
+    namedAny as named_any,
+)
 import attr
 
 from virtue.loaders import AttributeLoader, ModuleLoader
@@ -73,7 +76,7 @@ class ObjectLocator(object):
 
         obj = named_any(name)
         if ismethod(obj):
-            class_name, dot, method_name = name.rpartition(".")
+            class_name, _, method_name = name.rpartition(".")
             cls = named_any(class_name)
 
             is_aliased = not isclass(cls)
@@ -81,7 +84,15 @@ class ObjectLocator(object):
                 cls, method_name = obj.im_class, obj.__name__
 
             return [AttributeLoader(cls=cls, attribute=method_name)]
-        return self.locate_in(obj)
+        try:
+            return self.locate_in(obj)
+        except ValueError:
+            fqon = fully_qualified_name(obj)
+            class_name, _, method_name = fqon.rpartition(".")
+            cls = named_any(class_name)
+            if isclass(cls):
+                return [AttributeLoader(cls=cls, attribute=method_name)]
+            raise
 
     def locate_in(self, obj):
         """
