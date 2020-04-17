@@ -126,8 +126,8 @@ class TestObjectLocator(unittest.TestCase):
         cases = locator.locate_in(package)
         self.assertEqual(
             sorted(case.module.name for case in cases), [
-                b"virtue.tests.temp.sub.test_quux",
-                b"virtue.tests.temp.test_baz",
+                "virtue.tests.temp.sub.test_quux",
+                "virtue.tests.temp.test_baz",
             ],
         )
 
