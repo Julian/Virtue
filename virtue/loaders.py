@@ -8,10 +8,10 @@ class AttributeLoader(object):
     """
     I load a test case by instantiating a class with a given attribute name.
 
-    This is the typical way that :class:`unittest.TestCase` methods are loaded:
-    by calling ``TestCase("test_something")`` (and then by calling :meth:`run`
-    on the resulting instance to run the selected test method).
-
+    This is the typical way that `unittest.TestCase` methods are loaded:
+    by calling ``TestCase("test_something")`` (and then by calling
+    `~TestCase.run` on the resulting instance to run the selected test
+    method).
     """
 
     cls = attr.ib()
@@ -25,7 +25,6 @@ class AttributeLoader(object):
 class ModuleLoader(object):
     """
     I load a test case by locating tests in the module with the given name.
-
     """
 
     locator = attr.ib(repr=False)

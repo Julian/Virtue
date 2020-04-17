@@ -14,8 +14,8 @@ def prefixed_by(prefix):
 
     The returned callable takes two arguments, the attribute or name of
     the object, and possibly its corresponding value (which is ignored),
-    as suitable for use with :meth:`ObjectLocator.is_test_module` and
-    :meth:`ObjectLocator.is_test_method`\ .
+    as suitable for use with `ObjectLocator.is_test_module` and
+    `ObjectLocator.is_test_method`.
 
     """
 
