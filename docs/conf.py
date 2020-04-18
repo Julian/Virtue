@@ -6,12 +6,17 @@
 
 import re
 
+import virtue
+
 
 # -- Project information -----------------------------------------------------
 
 project = "Virtue"
 author = "Julian Berman"
 copyright = "2014" + author
+
+release = virtue.__version__
+version = release.partition("-")[0]
 
 
 # -- General configuration ---------------------------------------------------
