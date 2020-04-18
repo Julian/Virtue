@@ -67,8 +67,8 @@ def entire_domain(host):
 
 linkcheck_ignore = [
     entire_domain("codecov.io"),
-    "https://github.com/Julian/jsonschema/actions",
-    "https://github.com/Julian/jsonschema/workflows/CI/badge.svg",
+    "https://github.com/Julian/Virtue/actions",
+    "https://github.com/Julian/Virtue/workflows/CI/badge.svg",
 ]
 
 # -- Options for sphinxcontrib-spelling -----------------------------------
