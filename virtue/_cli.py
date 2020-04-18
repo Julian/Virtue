@@ -1,3 +1,5 @@
+from textwrap import dedent
+
 from twisted.python.reflect import namedAny as named_any
 import click
 # Sigh. http://twistedmatrix.com/trac/ticket/8267
@@ -44,7 +46,13 @@ class _Reporter(click.ParamType):
 @click.option(
     "--reporter",
     default=ComponentizedReporter(),
-    help="the name of a reporter to use for outputting test results",
+    help=dedent(
+        """
+        the name of a reporter to use for outputting test results.
+        Can either be a fully qualified object name (e.g.
+        mypackage.MyReporter) or one of the builtin reporter names:
+        """
+    ) + ", ".join(_Reporter._BUILT_IN),
     type=_Reporter(),
 )
 @click.option(
