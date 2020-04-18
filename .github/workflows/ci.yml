@@ -60,6 +60,12 @@ jobs:
         python-version: ${{ matrix.python-version.name }}
     - name: Ensure we have new enough versions to respect python_version
       run: python -m pip install -U pip setuptools
+    - name: Install dependencies
+      run: sudo apt-get install -y libenchant-dev
+      if: runner.os == 'Linux' && startsWith(matrix.python-version.toxenv, 'docs-')
+    - name: Install dependencies
+      run: brew install enchant
+      if: runner.os == 'macOS' && startsWith(matrix.python-version.toxenv, 'docs-')
     - name: Install tox
       run: python -m pip install tox
     - name: Run tox
