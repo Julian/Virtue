@@ -46,7 +46,5 @@ it'd be most welcome!
 You can also generally find me on Freenode (nick: ``tos9``) in various
 channels, including ``#python`` and ``#python-testing``.
 
-If you feel overwhelmingly grateful, you can woo me with beer money on
-`Gittip <https://www.gittip.com/Julian/>`_ or via Google Wallet with the email
-in my GitHub profile.
-
+If you feel overwhelmingly grateful, you can also woo me with beer money
+via GitHub Sponsors above.
