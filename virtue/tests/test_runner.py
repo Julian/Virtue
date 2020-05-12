@@ -6,7 +6,6 @@ import re
 from pyrsistent import v
 
 from virtue import runner
-from virtue.loaders import AttributeLoader
 from virtue.reporters import (
     ComponentizedReporter, Counter, Outputter, Recorder,
 )
@@ -132,7 +131,7 @@ class TestRunOutput(unittest.TestCase):
             Ran 5 tests in 0.000s
 
             FAILED (successes=3, failures=2)
-            """
+            """  # noqa: E501
         )
 
     def test_single_test(self):

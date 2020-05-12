@@ -32,7 +32,7 @@ class TestAttributeLoader(unittest.TestCase):
         )
         self.assertEqual(
             repr(loader),
-            "AttributeLoader(cls=<class 'virtue.tests.test_loaders.TestAttributeLoader'>, attribute='test_repr')",
+            "AttributeLoader(cls=<class 'virtue.tests.test_loaders.TestAttributeLoader'>, attribute='test_repr')",  # noqa: E501
         )
 
 

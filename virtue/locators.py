@@ -43,7 +43,7 @@ class ObjectLocator(object):
 
             decide whether the provided object is a test method
             or not. By default, callable objects whose names
-            (``__name__``\ s) start with ``test_`` are considered
+            (``__name__``s) start with ``test_`` are considered
             test methods.
 
         is_test_class (callable):
@@ -70,7 +70,7 @@ class ObjectLocator(object):
 
         The name should be a fully qualified object name. (E.g., the fully
         qualified object name of this function is
-        ``virtue.locators.ObjectLocator.locate_by_name``\ ).
+        ``virtue.locators.ObjectLocator.locate_by_name``).
 
         """
 
