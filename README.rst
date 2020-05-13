@@ -32,6 +32,18 @@ test runner.
 It is *not* a test framework (it doesn't contain a ``TestCase`` subclass
 and it never will).
 
+Usage
+-----
+
+Running a ``unittest``-based suite works essentially as it does for
+``twisted``'s ``trial``, i.e.::
+
+    $ python -m virtue mypackage.tests
+
+will run the tests subpackage of a given importable package.
+
+More docs are coming. Sorry.
+
 
 Contributing
 ------------
