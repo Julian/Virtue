@@ -1,11 +1,11 @@
 coverage:
-precision: 2
-round: down
-status:
+  precision: 2
+  round: down
+  status:
     patch:
-    default:
+      default:
         target: 100%
 
 comment:
-layout: "header, diff, uncovered"
-behavior: default
+  layout: "header, diff, uncovered"
+  behavior: default
