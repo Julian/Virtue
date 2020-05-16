@@ -20,7 +20,7 @@ Virtue
   :alt: Codecov Code coverage
   :target: https://codecov.io/gh/Julian/Virtue
 
-.. |ReadTheDocs| image:: https://readthedocs.org/projects/Virtue/badge/?version=stable&style=flat
+.. |ReadTheDocs| image:: https://readthedocs.org/projects/virtue/badge/?version=stable&style=flat
   :alt: ReadTheDocs status
   :target: https://virtue.readthedocs.io/en/stable/
 
