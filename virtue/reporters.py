@@ -168,6 +168,7 @@ class Counter(object):
 
     errors = attr.ib(default=0)
     failures = attr.ib(default=0)
+    expected_failures = attr.ib(default=0)
     successes = attr.ib(default=0)
 
     shouldStop = False
@@ -189,6 +190,9 @@ class Counter(object):
 
     def addFailure(self, test, exc_info):
         self.failures += 1
+
+    def addExpectedFailure(self, *args, **kwargs):
+        self.expected_failures += 1
 
     def addSuccess(self, test):
         self.successes += 1

@@ -18,10 +18,29 @@ class TestRun(unittest.TestCase):
         result = runner.run(tests=["virtue.tests.samples.one_successful_test"])
         self.assertEqual(result, Counter(successes=1))
 
+    def test_it_runs_unsuccessful_tests(self):
+        result = runner.run(
+            tests=["virtue.tests.samples.one_unsuccessful_test"],
+        )
+        self.assertEqual(result, Counter(failures=1))
+
+    def test_it_runs_expected_failing_tests(self):
+        result = runner.run(
+            tests=["virtue.tests.samples.one_expected_failure"],
+        )
+        self.assertEqual(result, Counter(expected_failures=1))
+
+    def test_it_runs_unexpectedly_passing_expected_failing_tests(self):
+        result = runner.run(
+            tests=[
+                "virtue.tests.samples.one_expected_failure_mispassing",
+            ],
+        )
+        self.assertEqual(result, Counter(failures=1))
+
     def test_it_can_stop_short(self):
         """
         Ooo, I stopped short.
-
         """
 
         result = runner.run(
@@ -33,11 +52,31 @@ class TestRun(unittest.TestCase):
         )
 
     def test_it_can_stop_short_combined_with_errors(self):
+        counter = runner.run(
+            tests=["virtue.tests.samples.failures_and_errors"],
+        )
+        self.assertGreater(counter.failures + counter.errors, 3)
+
         result = runner.run(
             tests=["virtue.tests.samples.failures_and_errors"],
             stop_after=3,
         )
         self.assertEqual(result.failures + result.errors, 3)
+
+    def test_it_can_stop_short_comined_with_unexpected_passing_tests(self):
+        """
+        RIP Jerry.
+        """
+        counter = runner.run(
+            tests=["virtue.tests.samples.failures_and_unexpected_passes"],
+        )
+        self.assertGreater(counter.failures + counter.errors, 2)
+
+        result = runner.run(
+            tests=["virtue.tests.samples.failures_and_unexpected_passes"],
+            stop_after=2,
+        )
+        self.assertEqual(result.failures + result.errors, 2)
 
     def test_unittest_TestResult(self):
         result = unittest.TestResult()
