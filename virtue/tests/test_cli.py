@@ -1,12 +1,12 @@
+from unittest import TestCase
 import os
 
 from twisted.trial.reporter import TreeReporter
 
 from virtue import _cli
-from virtue.compat import unittest
 
 
-class TestParser(unittest.TestCase):
+class TestParser(TestCase):
     def parse_args(self, argv):
         return _cli.main.make_context("virtue", argv).params
 
@@ -41,7 +41,7 @@ class TestParser(unittest.TestCase):
         )
 
 
-class TestMain(unittest.TestCase):
+class TestMain(TestCase):
     # TODO: these write to stdout
     def test_it_exits_successfully_for_successful_runs(self):
         with self.assertRaises(SystemExit) as e:

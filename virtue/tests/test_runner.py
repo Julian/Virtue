@@ -2,6 +2,7 @@
 from difflib import ndiff
 from textwrap import dedent
 import re
+import unittest
 
 from pyrsistent import v
 
@@ -9,7 +10,7 @@ from virtue import runner
 from virtue.reporters import (
     ComponentizedReporter, Counter, Outputter, Recorder,
 )
-from virtue.compat import StringIO, unittest
+from virtue.compat import StringIO
 
 
 class TestRun(unittest.TestCase):

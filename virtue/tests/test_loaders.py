@@ -1,10 +1,11 @@
+from unittest import TestCase
+
 from twisted.python.modules import getModule as get_module
 
 from virtue import loaders, locators
-from virtue.compat import unittest
 
 
-class TestAttributeLoader(unittest.TestCase):
+class TestAttributeLoader(TestCase):
     def test_it_loads_attributes(self):
         cls, attr = self.__class__, "test_it_loads_attributes"
         loader = loaders.AttributeLoader(cls=cls, attribute=attr)
@@ -36,7 +37,7 @@ class TestAttributeLoader(unittest.TestCase):
         )
 
 
-class TestModuleLoader(unittest.TestCase):
+class TestModuleLoader(TestCase):
 
     locator = locators.ObjectLocator()
 

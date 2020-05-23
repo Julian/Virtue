@@ -1,15 +1,15 @@
 from operator import attrgetter
+from unittest import TestCase
 import shutil
 
 from twisted.python.filepath import FilePath
 from twisted.python.reflect import fullyQualifiedName
 
 from virtue import locators
-from virtue.compat import unittest
 from virtue.loaders import AttributeLoader
 
 
-class TestObjectLocator(unittest.TestCase):
+class TestObjectLocator(TestCase):
     def test_it_finds_tests_in_an_object_specified_by_name(self):
         locator = locators.ObjectLocator()
         self.assertEqual(
@@ -44,7 +44,7 @@ class TestObjectLocator(unittest.TestCase):
             is_test_method=locators.prefixed_by("TEST"),
         )
 
-        class ASampleTestCase(unittest.TestCase):
+        class ASampleTestCase(TestCase):
             def not_a_test(self): pass
 
             def TEST1(self): pass
@@ -62,7 +62,7 @@ class TestObjectLocator(unittest.TestCase):
     def test_by_default_it_looks_for_methods_prefixed_by_test(self):
         locator = locators.ObjectLocator()
 
-        class ASampleTestCase(unittest.TestCase):
+        class ASampleTestCase(TestCase):
             def not_a_test(self): pass
 
             def TEST1(self): pass

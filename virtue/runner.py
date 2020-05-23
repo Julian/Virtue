@@ -1,6 +1,7 @@
+import unittest
+
 import attr
 
-from virtue.compat import unittest
 from virtue.locators import ObjectLocator
 from virtue.reporters import Counter
 

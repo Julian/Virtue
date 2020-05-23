@@ -1,8 +1,9 @@
+from unittest import TestCase
+
 from virtue import reporters
-from virtue.compat import unittest
 
 
-class TestRecorder(unittest.TestCase):
+class TestRecorder(TestCase):
     def setUp(self):
         self.recorder = reporters.Recorder()
 
