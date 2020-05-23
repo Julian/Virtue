@@ -69,14 +69,18 @@ class _StopAfterWrapper(object):
         return getattr(self._reporter, attr)
 
     def addError(self, *args, **kwargs):
-        self._see_failure()
+        self._see_nonsuccess()
         self._reporter.addError(*args, **kwargs)
 
     def addFailure(self, *args, **kwargs):
-        self._see_failure()
+        self._see_nonsuccess()
         self._reporter.addFailure(*args, **kwargs)
 
-    def _see_failure(self):
+    def addUnexpectedSuccess(self, *args, **kwargs):
+        self._see_nonsuccess()
+        self._reporter.addUnexpectedSuccess(*args, **kwargs)
+
+    def _see_nonsuccess(self):
         self._seen += 1
         if self._seen == self._limit:
             self.shouldStop = True

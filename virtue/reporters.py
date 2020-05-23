@@ -163,12 +163,12 @@ class Outputter(object):
 class Counter(object):
     """
     A counter is a recorder that does not hold references to tests it sees.
-
     """
 
     errors = attr.ib(default=0)
     failures = attr.ib(default=0)
     expected_failures = attr.ib(default=0)
+    unexpected_successes = attr.ib(default=0)
     successes = attr.ib(default=0)
 
     shouldStop = False
@@ -193,6 +193,9 @@ class Counter(object):
 
     def addExpectedFailure(self, *args, **kwargs):
         self.expected_failures += 1
+
+    def addUnexpectedSuccess(self, test):
+        self.unexpected_successes += 1
 
     def addSuccess(self, test):
         self.successes += 1

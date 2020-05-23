@@ -36,7 +36,7 @@ class TestRun(unittest.TestCase):
                 "virtue.tests.samples.one_expected_failure_mispassing",
             ],
         )
-        self.assertEqual(result, Counter(failures=1))
+        self.assertEqual(result, Counter(unexpected_successes=1))
 
     def test_it_can_stop_short(self):
         """
@@ -63,20 +63,20 @@ class TestRun(unittest.TestCase):
         )
         self.assertEqual(result.failures + result.errors, 3)
 
-    def test_it_can_stop_short_comined_with_unexpected_passing_tests(self):
+    def test_it_can_stop_short_combined_with_unexpected_passing_tests(self):
         """
         RIP Jerry.
         """
         counter = runner.run(
             tests=["virtue.tests.samples.failures_and_unexpected_passes"],
         )
-        self.assertGreater(counter.failures + counter.errors, 2)
+        self.assertGreater(counter.failures + counter.unexpected_successes, 2)
 
         result = runner.run(
             tests=["virtue.tests.samples.failures_and_unexpected_passes"],
             stop_after=2,
         )
-        self.assertEqual(result.failures + result.errors, 2)
+        self.assertEqual(result.failures + result.unexpected_successes, 2)
 
     def test_unittest_TestResult(self):
         result = unittest.TestResult()
