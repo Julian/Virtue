@@ -78,6 +78,12 @@ class TestRun(unittest.TestCase):
         )
         self.assertEqual(result.failures + result.unexpected_successes, 2)
 
+    def test_warnings_become_errors_by_default(self):
+        result = runner.run(
+            tests=["virtue.tests.samples.success_and_warning"],
+        )
+        self.assertEqual(result, Counter(errors=1, successes=1))
+
     def test_unittest_TestResult(self):
         result = unittest.TestResult()
         runner.run(

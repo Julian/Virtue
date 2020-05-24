@@ -1,4 +1,5 @@
 import unittest
+import warnings
 
 import attr
 
@@ -42,7 +43,9 @@ def run(tests=(), reporter=None, stop_after=None):
     )
     suite = unittest.TestSuite(cases)
     getattr(reporter, "startTestRun", lambda: None)()
-    suite.run(reporter)
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        suite.run(reporter)
     getattr(reporter, "stopTestRun", lambda: None)()
     return reporter
 
