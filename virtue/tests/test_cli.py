@@ -6,6 +6,10 @@ from twisted.trial.reporter import TreeReporter
 from virtue import _cli
 
 
+def DumbReporter():
+    return 12
+
+
 class TestParser(TestCase):
     def parse_args(self, argv):
         return _cli.main.make_context("virtue", argv).params
@@ -18,13 +22,11 @@ class TestParser(TestCase):
         arguments = self.parse_args(["--reporter", "tree", "foo"])
         self.assertIsInstance(arguments["reporter"], TreeReporter)
 
-    reporter = lambda: 12
-
     def test_it_retrieves_other_reporters_by_fully_qualified_name(self):
         arguments = self.parse_args(
-            ["--reporter", "virtue.tests.test_cli.TestParser.reporter", "abc"],
+            ["--reporter", "virtue.tests.test_cli.DumbReporter", "abc"],
         )
-        self.assertEqual(arguments["reporter"], 12)
+        self.assertEqual(arguments["reporter"], DumbReporter())
 
     def test_stop_after(self):
         arguments = self.parse_args(["-xxx", "bar", "baz"])
