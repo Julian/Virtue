@@ -28,5 +28,5 @@ jobs:
       run: python -m tox -e perf -- --append ${{ runner.temp }}/perf.json
     - uses: actions/upload-artifact@master
       with:
-        name: dist-${{ runner.os }}-${{ matrix.python-version }}
+        name: perf-${{ runner.os }}-${{ matrix.python-version }}
         path: ${{ runner.temp }}/perf.json
