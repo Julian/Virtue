@@ -26,7 +26,7 @@ Virtue
 
 
 ``virtue`` is a modern, extensible,
-`unittest <https://docs.python.org/2/library/unittest.html>`_ compliant
+`unittest <https://docs.python.org/3/library/unittest.html>`_ compliant
 test runner.
 
 It is *not* a test framework (it doesn't contain a ``TestCase`` subclass
