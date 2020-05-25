@@ -29,14 +29,15 @@ class _Reporter(click.ParamType):
             return value
 
         Reporter = self._BUILT_IN.get(value)
-        if Reporter is not None:
-            return Reporter()
-        try:
-            return named_any(value)
-        except Exception:
-            raise click.BadParameter(
-                "{0!r} is not a known reporter".format(value),
-            )
+        if Reporter is None:
+            try:
+                Reporter = named_any(value)
+            except Exception:
+                raise click.BadParameter(
+                    "{0!r} is not a known reporter".format(value),
+                )
+
+        return Reporter()
 
 
 @click.command(context_settings=dict(help_option_names=["-h", "--help"]))

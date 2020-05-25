@@ -18,13 +18,13 @@ class TestParser(TestCase):
         arguments = self.parse_args(["--reporter", "tree", "foo"])
         self.assertIsInstance(arguments["reporter"], TreeReporter)
 
-    reporter = object()
+    reporter = lambda: 12
 
     def test_it_retrieves_other_reporters_by_fully_qualified_name(self):
         arguments = self.parse_args(
             ["--reporter", "virtue.tests.test_cli.TestParser.reporter", "abc"],
         )
-        self.assertEqual(arguments["reporter"], self.reporter)
+        self.assertEqual(arguments["reporter"], 12)
 
     def test_stop_after(self):
         arguments = self.parse_args(["-xxx", "bar", "baz"])
