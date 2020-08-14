@@ -8,7 +8,6 @@ import re
 
 import virtue
 
-
 # -- Project information -----------------------------------------------------
 
 project = "Virtue"

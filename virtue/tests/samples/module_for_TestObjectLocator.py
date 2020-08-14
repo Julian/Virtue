@@ -1,6 +1,5 @@
 from unittest import TestCase
 
-
 something = 12
 
 

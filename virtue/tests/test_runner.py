@@ -7,10 +7,13 @@ import unittest
 from pyrsistent import v
 
 from virtue import runner
-from virtue.reporters import (
-    ComponentizedReporter, Counter, Outputter, Recorder,
-)
 from virtue.compat import StringIO
+from virtue.reporters import (
+    ComponentizedReporter,
+    Counter,
+    Outputter,
+    Recorder,
+)
 
 
 class TestRun(unittest.TestCase):

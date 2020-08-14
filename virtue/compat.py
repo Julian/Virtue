@@ -1,6 +1,5 @@
 import sys
 
-
 if sys.version_info[0] == 2:
     PY2 = True
     from cStringIO import StringIO

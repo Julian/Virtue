@@ -1,11 +1,9 @@
-from unittest import TestCase
 from inspect import isclass, ismethod, ismodule
+from unittest import TestCase
 
 from twisted.python.modules import getModule as get_module
-from twisted.python.reflect import (
-    fullyQualifiedName as fully_qualified_name,
-    namedAny as named_any,
-)
+from twisted.python.reflect import fullyQualifiedName as fully_qualified_name
+from twisted.python.reflect import namedAny as named_any
 import attr
 
 from virtue.loaders import AttributeLoader, ModuleLoader
