@@ -1,6 +1,7 @@
 # -*- encoding: utf-8 -*-
 from difflib import ndiff
 from textwrap import dedent
+import os
 import re
 import unittest
 
@@ -86,6 +87,23 @@ class TestRun(unittest.TestCase):
             tests=["virtue.tests.samples.success_and_warning"],
         )
         self.assertEqual(result, Counter(errors=1, successes=1))
+
+    def test_it_runs_tests_by_path_if_you_insist(self):
+        import virtue.tests.samples
+        path = os.path.join(
+            os.path.dirname(virtue.tests.samples.__file__),
+            "one_unsuccessful_test.py",
+        )
+        result = runner.run(tests=[path])
+        self.assertEqual(result, Counter(failures=1))
+
+    def test_it_errors_for_paths_that_do_not_exist(self):
+        path = os.path.join(
+            os.path.dirname(__file__),
+            "this_is_a_path_that_doesnt_exist_yes_it_goes_on_and_on_my_friend",
+        )
+        with self.assertRaises(Exception):
+            runner.run(tests=[path])
 
     def test_unittest_TestResult(self):
         result = unittest.TestResult()

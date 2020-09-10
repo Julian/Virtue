@@ -2,8 +2,10 @@ from inspect import isclass, ismethod, ismodule
 from unittest import TestCase
 
 from twisted.python.modules import getModule as get_module
+from twisted.python.reflect import ModuleNotFound, ObjectNotFound
 from twisted.python.reflect import fullyQualifiedName as fully_qualified_name
 from twisted.python.reflect import namedAny as named_any
+from twisted.trial.runner import filenameToModule as filename_to_module
 import attr
 
 from virtue.loaders import AttributeLoader, ModuleLoader
@@ -70,9 +72,16 @@ class ObjectLocator(object):
         qualified object name of this function is
         ``virtue.locators.ObjectLocator.locate_by_name``).
 
+        A path may also alternatively used, but no `PYTHONPATH`
+        modification will be done, so the file must be importable
+        without modification.
         """
 
-        obj = named_any(name)
+        try:
+            obj = named_any(name)
+        except (ModuleNotFound, ObjectNotFound):
+            obj = filename_to_module(name)
+
         if ismethod(obj):
             class_name, _, method_name = name.rpartition(".")
             cls = named_any(class_name)
@@ -95,7 +104,6 @@ class ObjectLocator(object):
     def locate_in(self, obj):
         """
         Attempt to locate the test cases in the given object (of any kind).
-
         """
 
         # We don't use inspect.getmembers because its predicate only
@@ -117,7 +125,6 @@ class ObjectLocator(object):
     def locate_in_package(self, package):
         """
         Locate all of the test cases contained in the given package.
-
         """
 
         for module in get_module(package.__name__).walkModules():
@@ -128,7 +135,6 @@ class ObjectLocator(object):
     def locate_in_module(self, module):
         """
         Locate all of the test cases contained in the given module.
-
         """
 
         for attribute in dir(module):
@@ -140,7 +146,6 @@ class ObjectLocator(object):
     def locate_in_class(self, cls):
         """
         Locate the methods on the given class that are test cases.
-
         """
 
         for attribute in dir(cls):
