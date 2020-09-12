@@ -10,8 +10,8 @@ class AttributeLoader(object):
 
     This is the typical way that `unittest.TestCase` methods are loaded:
     by calling ``TestCase("test_something")`` (and then by calling
-    `~TestCase.run` on the resulting instance to run the selected test
-    method).
+    :meth:`~unittest.TestCase.run` on the resulting instance to run the
+    selected test method).
     """
 
     cls = attr.ib()

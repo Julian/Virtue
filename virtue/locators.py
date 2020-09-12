@@ -39,20 +39,20 @@ class ObjectLocator(object):
 
     Arguments:
 
-        is_test_method (callable):
+        is_test_method (collections.abc.Callable):
 
             decide whether the provided object is a test method
             or not. By default, callable objects whose names
             (``__name__``s) start with ``test_`` are considered
             test methods.
 
-        is_test_class (callable):
+        is_test_class (collections.abc.Callable):
 
             decide whether the provided object is a test
             class or not. By default, objects inheriting from
             `unittest.TestCase` are considered test cases.
 
-        is_test_module (callable):
+        is_test_module (collections.abc.Callable):
 
             decide whether the provided object is a test module
             or not. By default, modules whose names start with
@@ -60,8 +60,11 @@ class ObjectLocator(object):
 
     """
 
+    #: Whether an object is a test method or not
     is_test_method = attr.ib(default=prefixed_by("test"), repr=False)
+    #: Whether an object is a test class or not
     is_test_class = attr.ib(default=inherits_from_TestCase, repr=False)
+    #: Whether an object is a test module or not
     is_test_module = attr.ib(default=prefixed_by("test_"), repr=False)
 
     def locate_by_name(self, name):

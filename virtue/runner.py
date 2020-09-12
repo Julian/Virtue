@@ -13,14 +13,14 @@ def run(tests=(), reporter=None, stop_after=None):
 
     Arguments:
 
-        tests (iterable):
+        tests (collections.abc.Iterable):
 
             the collection of tests (specified as `str` s) to run
 
-        reporter (Reporter):
+        reporter (twisted.trial.itrial.IReporter):
 
-            a `Reporter` to use for the run. If unprovided, the default
-            is to return a `virtue.reporters.Counter` (which produces no
+            a reporter to use for the run. If unprovided, the default is
+            to return a `virtue.reporters.Counter` (which produces no
             output).
 
         stop_after (int):
