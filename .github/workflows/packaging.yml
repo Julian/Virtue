@@ -11,7 +11,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: [pypy2, pypy3, 3.7, 3.8]
+        python-version: [pypy3, 3.7, 3.8, 3.9]
 
     steps:
     - uses: actions/checkout@v2
@@ -25,7 +25,7 @@ jobs:
       run: python -m build .
     - uses: actions/upload-artifact@master
       with:
-        name: dist-${{ matrix.python-version }}
+        name: dist-${{ matrix.os }}-${{ matrix.python-version }}
         path: dist
     - name: Publish package
       if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags') && matrix.python-version == 'pypy3' && runner.os == 'Linux'
