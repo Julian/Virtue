@@ -4,7 +4,6 @@ from twisted.python.reflect import namedAny as named_any
 import click
 import twisted.trial.reporter
 
-from virtue import __version__
 from virtue.reporters import ComponentizedReporter
 from virtue.runner import run
 
@@ -41,7 +40,7 @@ class _Reporter(click.ParamType):
 
 
 @click.command(context_settings=dict(help_option_names=["-h", "--help"]))
-@click.version_option(version=__version__, prog_name="virtue")
+@click.version_option(prog_name="virtue")
 @click.option(
     "--reporter",
     default=ComponentizedReporter(),

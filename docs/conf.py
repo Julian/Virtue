@@ -4,9 +4,8 @@
 # list see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
+import importlib.metadata
 import re
-
-import virtue
 
 # -- Project information -----------------------------------------------------
 
@@ -14,7 +13,7 @@ project = "Virtue"
 author = "Julian Berman"
 copyright = "2014, " + author
 
-release = virtue.__version__
+release = importlib.metadata.version("virtue")
 version = release.partition("-")[0]
 
 
