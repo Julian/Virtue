@@ -17,7 +17,7 @@ chardet==4.0.0
 docutils==0.16
     # via sphinx
 furo==2021.4.11b34
-    # via -r docs/requirements.in
+    # via -r requirements.in
 idna==2.10
     # via requests
 imagesize==1.2.0
@@ -31,7 +31,7 @@ packaging==20.9
 pyenchant==3.2.0
     # via sphinxcontrib-spelling
 pygments-github-lexers==0.0.5
-    # via -r docs/requirements.in
+    # via -r requirements.in
 pygments==2.9.0
     # via
     #   pygments-github-lexers
@@ -48,7 +48,7 @@ soupsieve==2.2.1
     # via beautifulsoup4
 sphinx==3.5.4
     # via
-    #   -r docs/requirements.in
+    #   -r requirements.in
     #   furo
     #   sphinxcontrib-spelling
 sphinxcontrib-applehelp==1.0.2
@@ -64,8 +64,8 @@ sphinxcontrib-qthelp==1.0.3
 sphinxcontrib-serializinghtml==1.1.4
     # via sphinx
 sphinxcontrib-spelling==7.2.1
-    # via -r docs/requirements.in
-urllib3==1.26.4
+    # via -r requirements.in
+urllib3==1.26.5
     # via requests
 
 # The following packages are considered to be unsafe in a requirements file:
