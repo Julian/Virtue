@@ -79,6 +79,15 @@ class TestObjectLocator(TestCase):
             ],
         )
 
+    def test_it_loads_methods_from_dynamically_created_test_case_classes(self):
+        locator = locators.ObjectLocator()
+        from virtue.tests.samples.dynamic_test import TestFoo
+        name = "virtue.tests.samples.dynamic_test.TestFoo.test_F0"
+        self.assertEqual(
+            list(locator.locate_by_name(name)),
+            [AttributeLoader(cls=TestFoo, attribute="test_F0")],
+        )
+
     def test_it_finds_test_case_classes_on_modules(self):
         locator = locators.ObjectLocator(
             is_test_class=(lambda attr, value: attr != "Foo"),

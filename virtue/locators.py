@@ -99,9 +99,17 @@ class ObjectLocator(object):
         except ValueError:
             fqon = fully_qualified_name(obj)
             class_name, _, method_name = fqon.rpartition(".")
-            cls = named_any(class_name)
-            if isclass(cls):
-                return [AttributeLoader(cls=cls, attribute=method_name)]
+
+            try:
+                cls = named_any(class_name)
+            except AttributeError:
+                class_name, _, method_name = name.rpartition(".")
+                cls = named_any(class_name)
+                if isclass(cls):
+                    return [AttributeLoader(cls=cls, attribute=method_name)]
+            else:
+                if isclass(cls):
+                    return [AttributeLoader(cls=cls, attribute=method_name)]
             raise
 
     def locate_in(self, obj):
