@@ -73,4 +73,8 @@ def main(context, **kwargs):
     """
 
     result = run(**kwargs)
-    context.exit(not result.wasSuccessful())
+    # FIXME: add this to the reporter interface (probably by making
+    # things *always* use a ComponentizedReporter with a Recorder, and
+    # then just swapping the rest out)
+    count = getattr(getattr(result, "recorder", None), "count", 1)
+    context.exit(not count or not result.wasSuccessful())

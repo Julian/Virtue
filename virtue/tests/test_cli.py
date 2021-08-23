@@ -74,3 +74,8 @@ class TestMain(TestCase):
                 ],
             )
         self.assertNotEqual(e.exception.code, os.EX_OK)
+
+    def test_it_exits_unsuccessfully_when_no_tests_ran(self):
+        with self.assertRaises(SystemExit) as e:
+            _cli.main(["virtue.tests.samples.no_tests"])
+        self.assertNotEqual(e.exception.code, os.EX_OK)
