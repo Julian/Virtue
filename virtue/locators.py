@@ -1,4 +1,4 @@
-from inspect import isclass, ismethod, ismodule
+from inspect import isclass, ismodule
 from unittest import TestCase
 
 from twisted.python.modules import getModule as get_module
