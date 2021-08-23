@@ -85,15 +85,6 @@ class ObjectLocator(object):
         except (ModuleNotFound, ObjectNotFound):
             obj = filename_to_module(name)
 
-        if ismethod(obj):
-            class_name, _, method_name = name.rpartition(".")
-            cls = named_any(class_name)
-
-            is_aliased = not isclass(cls)
-            if is_aliased:
-                cls, method_name = obj.im_class, obj.__name__
-
-            return [AttributeLoader(cls=cls, attribute=method_name)]
         try:
             return self.locate_in(obj)
         except ValueError:
