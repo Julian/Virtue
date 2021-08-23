@@ -32,9 +32,7 @@ class _Reporter(click.ParamType):
             try:
                 Reporter = named_any(value)
             except Exception:
-                raise click.BadParameter(
-                    "{0!r} is not a known reporter".format(value),
-                )
+                raise click.BadParameter(f"{value!r} is not a known reporter")
 
         return Reporter()
 

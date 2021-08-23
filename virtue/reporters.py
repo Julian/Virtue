@@ -30,13 +30,10 @@ class Outputter(object):
 
         if colored:
             from colorama import Fore, Style
-            message = "{Style.BRIGHT}{color}{text}{Style.RESET_ALL}"
             for attribute, color, text in self._COLORS:
-                setattr(
-                    self, attribute, message.format(
-                        Style=Style, color=getattr(Fore, color), text=text,
-                    )
-                )
+                color = getattr(Fore, color)
+                message = f"{Style.BRIGHT}{color}{text}{Style.RESET_ALL}"
+                setattr(self, attribute, message)
         else:
             for attribute, _, text in self._COLORS:
                 setattr(self, attribute, text)
@@ -70,7 +67,7 @@ class Outputter(object):
             ):
                 subcount = len(getattr(recorder, attribute))
                 if subcount:
-                    summary.append("{0}={1}".format(attribute, subcount))
+                    summary.append(f"{attribute}={subcount}")
             yield ", ".join(summary)
             yield ")"
 
@@ -145,9 +142,7 @@ class Outputter(object):
         return self.format_line(test, self._ok)
 
     def format_line(self, test, result):
-        before = "{indent}{indent}{name} ...".format(
-            indent=self.indent, name=test._testMethodName,
-        )
+        before = f"{self.indent}{self.indent}{test._testMethodName} ..."
         return self._pad_center(left=before, right=result) + "\n"
 
     def _pad_center(self, left, right):

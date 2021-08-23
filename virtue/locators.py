@@ -119,9 +119,7 @@ class ObjectLocator(object):
             return self.locate_in_class(obj)
         else:
             raise ValueError(
-                "Can't determine the appropriate way to load {0!r}".format(
-                    obj,
-                )
+                f"Can't determine the appropriate way to load {obj!r}",
             )
 
     def locate_in_package(self, package):
