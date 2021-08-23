@@ -51,18 +51,14 @@ class Outputter(object):
             yield line
         yield "\n"
         yield "-" * self.line_width
-        yield "\n"
-        count = recorder.count
-        yield "Ran {count} test{s} in {runtime:.3f}s\n".format(
-            count=count, runtime=runtime, s="s" if count != 1 else "",
-        )
-        yield "\n"
+        tests = "tests" if recorder.testsRun != 1 else "test"
+        yield f"\nRan {recorder.testsRun} {tests} in {runtime:.3f}s\n\n"
         if recorder.wasSuccessful():
             yield self._passed
         else:
             yield self._failed
 
-        if recorder.count:
+        if recorder.testsRun:
             yield " ("
             summary = []
             for attribute in (
@@ -213,7 +209,7 @@ class Recorder(object):
     shouldStop = False
 
     @property
-    def count(self):
+    def testsRun(self):
         return sum(len(tests) for tests in attr.astuple(self))
 
     def startTestRun(self):
@@ -256,6 +252,10 @@ class ComponentizedReporter(object):
     _time = attr.ib(default=time, repr=False)
 
     shouldStop = False
+
+    @property
+    def testsRun(self):
+        return self.recorder.testsRun
 
     def startTestRun(self):
         self._start_time = self._time()
