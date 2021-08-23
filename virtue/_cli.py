@@ -43,7 +43,7 @@ class _Reporter(click.ParamType):
 @click.version_option(prog_name="virtue")
 @click.option(
     "--reporter",
-    default=ComponentizedReporter(),
+    default="default",
     help=dedent(
         """
         the name of a reporter to use for outputting test results.
