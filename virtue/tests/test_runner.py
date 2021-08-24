@@ -227,3 +227,43 @@ class TestRunOutput(unittest.TestCase):
             PASSED
             """
         )
+
+    def test_unexpected_success(self):
+        self.assertOutputIs(
+            tests=["virtue.tests.samples.failures_and_unexpected_passes"],
+            expected="""
+            virtue.tests.samples.failures_and_unexpected_passes
+              Foo
+                test_bar ...    [UNEXPECTED SUCCESS]
+                test_baz ...    [UNEXPECTED SUCCESS]
+                test_foo ...                  [FAIL]
+                test_quux ...   [UNEXPECTED SUCCESS]
+                test_spam ...                   [OK]
+
+            ========================================
+            [UNEXPECTED SUCCESS]
+            virtue.tests.samples.failures_and_unexpected_passes.Foo.test_bar
+            ========================================
+            [UNEXPECTED SUCCESS]
+            virtue.tests.samples.failures_and_unexpected_passes.Foo.test_baz
+            ========================================
+            [FAIL]
+            Traceback (most recent call last):
+              File "•unittest/case.py•", line •, in •
+                •
+              File "•virtue/tests/samples/failures_and_unexpected_passes.py•", line •, in test_foo
+                self.fail("Nope!")
+              File "•unittest/case.py•", line •, in fail
+                raise self.failureException(msg)
+            AssertionError: Nope!
+
+            virtue.tests.samples.failures_and_unexpected_passes.Foo.test_foo
+            ========================================
+            [UNEXPECTED SUCCESS]
+            virtue.tests.samples.failures_and_unexpected_passes.Foo.test_quux
+            ----------------------------------------
+            Ran 5 tests in 0.000s
+
+            FAILED (successes=1, failures=1, unexpected_successes=3)
+            """
+        )

@@ -14,6 +14,7 @@ class Outputter(object):
 
     FAILED, PASSED = "FAILED", "PASSED"
     ERROR, FAIL, OK, SKIPPED = "[ERROR]", "[FAIL]", "[OK]", "[SKIPPED]"
+    UNEXPECTED_SUCCESS = "[UNEXPECTED SUCCESS]"
 
     _COLORS = [
         ("_error", "RED", ERROR),
@@ -22,6 +23,7 @@ class Outputter(object):
         ("_ok", "GREEN", OK),
         ("_passed", "GREEN", PASSED),
         ("_skipped", "BLUE", SKIPPED),
+        ("_unexpected_success", "RED", UNEXPECTED_SUCCESS),
     ]
 
     def __init__(self, colored=True, indent=" " * 2, line_width=120):
@@ -140,6 +142,21 @@ class Outputter(object):
 
     def test_succeeded(self, test):
         return self.format_line(test, self._ok)
+
+    def test_unexpectedly_succeeded(self, test):
+        self._after.extend(
+            [
+                "\n",
+                "=" * self.line_width,
+                "\n",
+                self.UNEXPECTED_SUCCESS,
+                "\n",
+                fully_qualified_name(test.__class__),
+                ".",
+                test._testMethodName,
+            ],
+        )
+        return self.format_line(test, self._unexpected_success)
 
     def format_line(self, test, result):
         before = f"{self.indent}{self.indent}{test._testMethodName} ..."
@@ -291,6 +308,12 @@ class ComponentizedReporter(object):
     def addSuccess(self, test):
         self.recorder.addSuccess(test)
         self.stream.writelines(self.outputter.test_succeeded(test) or "")
+
+    def addUnexpectedSuccess(self, test):
+        self.recorder.addUnexpectedSuccess(test)
+        self.stream.writelines(
+            self.outputter.test_unexpectedly_succeeded(test) or "",
+        )
 
     def wasSuccessful(self):
         return self.recorder.wasSuccessful()
