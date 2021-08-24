@@ -23,7 +23,7 @@ class Outputter(object):
         ("_ok", "GREEN", OK),
         ("_passed", "GREEN", PASSED),
         ("_skipped", "BLUE", SKIPPED),
-        ("_unexpected_success", "RED", UNEXPECTED_SUCCESS),
+        ("_unexpected_success", "YELLOW", UNEXPECTED_SUCCESS),
     ]
 
     def __init__(self, colored=True, indent=" " * 2, line_width=120):
