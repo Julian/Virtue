@@ -14,7 +14,7 @@ class Outputter(object):
 
     FAILED, PASSED = "FAILED", "PASSED"
     ERROR, FAIL, OK, SKIPPED = "[ERROR]", "[FAIL]", "[OK]", "[SKIPPED]"
-    UNEXPECTED_SUCCESS = "[UNEXPECTED SUCCESS]"
+    EXPECTED_FAILURE, UNEXPECTED_SUCCESS = "[XFAIL]", "[UNEXPECTED SUCCESS]"
 
     _COLORS = [
         ("_error", "RED", ERROR),
@@ -24,6 +24,7 @@ class Outputter(object):
         ("_passed", "GREEN", PASSED),
         ("_skipped", "BLUE", SKIPPED),
         ("_unexpected_success", "YELLOW", UNEXPECTED_SUCCESS),
+        ("_expected_failure", "BLUE", EXPECTED_FAILURE),
     ]
 
     def __init__(self, colored=True, indent=" " * 2, line_width=120):
@@ -65,6 +66,7 @@ class Outputter(object):
                 "skips",
                 "failures",
                 "errors",
+                "expected_failures",
                 "unexpected_successes",
             ):
                 subcount = len(getattr(recorder, attribute))
@@ -140,8 +142,20 @@ class Outputter(object):
         )
         return self.format_line(test, self._skipped)
 
-    def test_succeeded(self, test):
-        return self.format_line(test, self._ok)
+    def test_expectedly_failed(self, test, exc_info):
+        self._after.extend(
+            [
+                "\n",
+                "=" * self.line_width,
+                "\n",
+                self.EXPECTED_FAILURE,
+                "\n",
+                fully_qualified_name(test.__class__),
+                ".",
+                test._testMethodName,
+            ],
+        )
+        return self.format_line(test, self._expected_failure)
 
     def test_unexpectedly_succeeded(self, test):
         self._after.extend(
@@ -157,6 +171,9 @@ class Outputter(object):
             ],
         )
         return self.format_line(test, self._unexpected_success)
+
+    def test_succeeded(self, test):
+        return self.format_line(test, self._ok)
 
     def format_line(self, test, result):
         before = f"{self.indent}{self.indent}{test._testMethodName} ..."
@@ -216,6 +233,7 @@ class Recorder(object):
     failures = attr.ib(default=v())
     skips = attr.ib(default=v())
     successes = attr.ib(default=v())
+    expected_failures = attr.ib(default=v())
     unexpected_successes = attr.ib(default=v())
 
     shouldStop = False
@@ -241,6 +259,11 @@ class Recorder(object):
 
     def addFailure(self, test, exc_info):
         self.failures = self.failures.append((test, exc_info))
+
+    def addExpectedFailure(self, test, exc_info):
+        self.expected_failures = self.expected_failures.append(
+            (test, exc_info),
+        )
 
     def addSkip(self, test, reason):
         self.skips = self.skips.append(test)
@@ -305,15 +328,21 @@ class ComponentizedReporter(object):
         self.recorder.addSkip(test, reason)
         self.stream.writelines(self.outputter.test_skipped(test, reason) or "")
 
-    def addSuccess(self, test):
-        self.recorder.addSuccess(test)
-        self.stream.writelines(self.outputter.test_succeeded(test) or "")
+    def addExpectedFailure(self, test, exc_info):
+        self.recorder.addExpectedFailure(test, exc_info)
+        self.stream.writelines(
+            self.outputter.test_expectedly_failed(test, exc_info) or "",
+        )
 
     def addUnexpectedSuccess(self, test):
         self.recorder.addUnexpectedSuccess(test)
         self.stream.writelines(
             self.outputter.test_unexpectedly_succeeded(test) or "",
         )
+
+    def addSuccess(self, test):
+        self.recorder.addSuccess(test)
+        self.stream.writelines(self.outputter.test_succeeded(test) or "")
 
     def wasSuccessful(self):
         return self.recorder.wasSuccessful()

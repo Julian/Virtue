@@ -228,6 +228,24 @@ class TestRunOutput(unittest.TestCase):
             """
         )
 
+    def test_expected_failure(self):
+        self.assertOutputIs(
+            tests=["virtue.tests.samples.one_expected_failure"],
+            expected="""
+            virtue.tests.samples.one_expected_failure
+              Foo
+                test_foo ...                 [XFAIL]
+
+            ========================================
+            [XFAIL]
+            virtue.tests.samples.one_expected_failure.Foo.test_foo
+            ----------------------------------------
+            Ran 1 test in 0.000s
+
+            PASSED (expected_failures=1)
+            """
+        )
+
     def test_unexpected_success(self):
         self.assertOutputIs(
             tests=["virtue.tests.samples.failures_and_unexpected_passes"],
