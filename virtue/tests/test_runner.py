@@ -269,7 +269,7 @@ class TestRunOutput(unittest.TestCase):
             Traceback (most recent call last):
               File "•unittest/case.py•", line •, in •
                 •
-              File "•virtue/tests/samples/failures_and_unexpected_passes.py•", line •, in test_foo
+              File "•/failures_and_unexpected_passes.py•", line •, in test_foo
                 self.fail("Nope!")
               File "•unittest/case.py•", line •, in fail
                 raise self.failureException(msg)
