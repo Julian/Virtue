@@ -57,17 +57,11 @@ class TestModuleLoader(TestCase):
     def test_eq_neq(self):
         virtue, os = get_module("virtue"), get_module("os")
         loader = loaders.ModuleLoader(locator=self.locator, module=virtue)
-        self.assertTrue(
-            loader == loaders.ModuleLoader(locator=self.locator, module=virtue)
+        self.assertEqual(
+            loader, loaders.ModuleLoader(locator=self.locator, module=virtue),
         )
-        self.assertFalse(
-            loader != loaders.ModuleLoader(locator=self.locator, module=virtue)
-        )
-        self.assertFalse(
-            loader == loaders.ModuleLoader(locator=self.locator, module=os),
-        )
-        self.assertTrue(
-            loader != loaders.ModuleLoader(locator=self.locator, module=os),
+        self.assertNotEqual(
+            loader, loaders.ModuleLoader(locator=self.locator, module=os),
         )
 
     def test_repr(self):

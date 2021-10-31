@@ -45,11 +45,14 @@ class TestObjectLocator(TestCase):
         )
 
         class ASampleTestCase(TestCase):
-            def not_a_test(self): pass
+            def not_a_test(self):
+                pass
 
-            def TEST1(self): pass
+            def TEST1(self):
+                pass
 
-            def TEST_2(self): pass
+            def TEST_2(self):
+                pass
 
         cases = locator.locate_in(ASampleTestCase)
         self.assertEqual(
@@ -63,13 +66,17 @@ class TestObjectLocator(TestCase):
         locator = locators.ObjectLocator()
 
         class ASampleTestCase(TestCase):
-            def not_a_test(self): pass
+            def not_a_test(self):
+                pass
 
-            def TEST1(self): pass
+            def TEST1(self):
+                pass
 
-            def test_foo(self): pass
+            def test_foo(self):
+                pass
 
-            def testBar(self): pass
+            def testBar(self):
+                pass
 
         cases = locator.locate_in(ASampleTestCase)
         self.assertEqual(

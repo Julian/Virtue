@@ -301,7 +301,7 @@ class ComponentizedReporter(object):
         self.recorder.stopTestRun()
         runtime = self._time() - self._start_time
         self.stream.writelines(
-            self.outputter.run_stopped(self.recorder, runtime) or ""
+            self.outputter.run_stopped(self.recorder, runtime) or "",
         )
 
     def startTest(self, test):
@@ -315,13 +315,13 @@ class ComponentizedReporter(object):
     def addError(self, test, exc_info):
         self.recorder.addError(test, exc_info)
         self.stream.writelines(
-            self.outputter.test_errored(test, exc_info) or ""
+            self.outputter.test_errored(test, exc_info) or "",
         )
 
     def addFailure(self, test, exc_info):
         self.recorder.addFailure(test, exc_info)
         self.stream.writelines(
-            self.outputter.test_failed(test, exc_info) or ""
+            self.outputter.test_failed(test, exc_info) or "",
         )
 
     def addSkip(self, test, reason):

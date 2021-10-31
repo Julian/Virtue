@@ -148,8 +148,9 @@ class TestRunOutput(unittest.TestCase):
 
         if re.search(globbed, got, re.DOTALL) is None:
             self.fail(
-                "\n    " +
-                "\n    ".join(ndiff(got.splitlines(), dedented.splitlines()))
+                "\n    " + "\n    ".join(
+                    ndiff(got.splitlines(), dedented.splitlines()),
+                ),
             )
 
     def test_unsuccessful_run(self):
@@ -198,7 +199,7 @@ class TestRunOutput(unittest.TestCase):
             Ran 5 tests in 0.000s
 
             FAILED (successes=3, failures=2)
-            """  # noqa: E501
+            """,  # noqa: E501
         )
 
     def test_single_test(self):
@@ -213,7 +214,7 @@ class TestRunOutput(unittest.TestCase):
             Ran 1 test in 0.000s
 
             PASSED (successes=1)
-            """
+            """,
         )
 
     def test_empty_run(self):
@@ -225,7 +226,7 @@ class TestRunOutput(unittest.TestCase):
             Ran 0 tests in 0.000s
 
             PASSED
-            """
+            """,
         )
 
     def test_expected_failure(self):
@@ -243,7 +244,7 @@ class TestRunOutput(unittest.TestCase):
             Ran 1 test in 0.000s
 
             PASSED (expected_failures=1)
-            """
+            """,
         )
 
     def test_unexpected_success(self):
@@ -283,5 +284,5 @@ class TestRunOutput(unittest.TestCase):
             Ran 5 tests in 0.000s
 
             FAILED (successes=1, failures=1, unexpected_successes=3)
-            """
+            """,
         )

@@ -47,7 +47,7 @@ class _Reporter(click.ParamType):
         the name of a reporter to use for outputting test results.
         Can either be a fully qualified object name (e.g.
         mypackage.MyReporter) or one of the builtin reporter names:
-        """
+        """,
     ) + ", ".join(_Reporter._BUILT_IN),
     type=_Reporter(),
 )
@@ -58,7 +58,7 @@ class _Reporter(click.ParamType):
     help=(
         "stop the test run after unsuccessful results. May be "
         "repeated to stop after that many non-successes."
-    )
+    ),
 )
 @click.argument("tests", nargs=-1)
 @click.pass_context
