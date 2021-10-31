@@ -83,7 +83,10 @@ class ObjectLocator(object):
         try:
             obj = named_any(name)
         except (ModuleNotFound, ObjectNotFound):
-            obj = filename_to_module(name)
+            try:
+                obj = filename_to_module(name)
+            except ValueError as error:
+                raise FileNotFoundError(error)
 
         try:
             return self.locate_in(obj)

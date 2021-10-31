@@ -102,7 +102,7 @@ class TestRun(unittest.TestCase):
             os.path.dirname(__file__),
             "this_is_a_path_that_doesnt_exist_yes_it_goes_on_and_on_my_friend",
         )
-        with self.assertRaises(Exception):
+        with self.assertRaises(FileNotFoundError):
             runner.run(tests=[path])
 
     def test_unittest_TestResult(self):
