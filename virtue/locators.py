@@ -1,5 +1,5 @@
-from inspect import isclass, ismodule
 from unittest import TestCase
+import inspect
 
 from twisted.python.modules import getModule as get_module
 from twisted.python.reflect import ModuleNotFound, ObjectNotFound
@@ -67,6 +67,11 @@ class ObjectLocator:
     #: Whether an object is a test module or not
     is_test_module = attr.ib(default=prefixed_by("test_"), repr=False)
 
+    def __attrs_post_init__(self):
+        fn, self.is_test_class = self.is_test_class, lambda attr, cls: (
+            inspect.isclass(cls) and fn(attr, cls)
+        )
+
     def locate_by_name(self, name):
         """
         Locate any tests found in the object referred to by the given name.
@@ -99,10 +104,10 @@ class ObjectLocator:
             except AttributeError:
                 class_name, _, method_name = name.rpartition(".")
                 cls = named_any(class_name)
-                if isclass(cls):
+                if inspect.isclass(cls):
                     return [AttributeLoader(cls=cls, attribute=method_name)]
             else:
-                if isclass(cls):
+                if inspect.isclass(cls):
                     return [AttributeLoader(cls=cls, attribute=method_name)]
             raise
 
@@ -113,12 +118,12 @@ class ObjectLocator:
 
         # We don't use inspect.getmembers because its predicate only
         # takes the value, not the attr name.
-        if ismodule(obj):
+        if inspect.ismodule(obj):
             is_package = getattr(obj, "__path__", None)
             if is_package is not None:
                 return self.locate_in_package(obj)
             return self.locate_in_module(obj)
-        elif isclass(obj):
+        elif inspect.isclass(obj):
             return self.locate_in_class(obj)
         else:
             raise ValueError(
@@ -140,18 +145,15 @@ class ObjectLocator:
         Locate all of the test cases contained in the given module.
         """
 
-        for attribute in dir(module):
-            value = getattr(module, attribute, None)
-            if isclass(value) and self.is_test_class(attribute, value):
-                for test_case in self.locate_in_class(value):
-                    yield test_case
+        for attribute, value in inspect.getmembers(module):
+            if self.is_test_class(attribute, value):
+                yield from self.locate_in_class(value)
 
     def locate_in_class(self, cls):
         """
         Locate the methods on the given class that are test cases.
         """
 
-        for attribute in dir(cls):
-            value = getattr(cls, attribute, None)
+        for attribute, value in inspect.getmembers(cls):
             if callable(value) and self.is_test_method(attribute, value):
                 yield AttributeLoader(cls=cls, attribute=attribute)
