@@ -33,7 +33,7 @@ def inherits_from_TestCase(attr, cls):
 
 
 @attr.s
-class ObjectLocator(object):
+class ObjectLocator:
     """
     I locate test cases on an object: a package, module or test class.
 

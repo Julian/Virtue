@@ -50,7 +50,7 @@ def run(tests=(), reporter=None, stop_after=None):
 
 
 @attr.s(eq=False)
-class _StopAfterWrapper(object):
+class _StopAfterWrapper:
     """
     Wrap a reporter to stop after a specified number of non-successes.
 

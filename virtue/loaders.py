@@ -4,7 +4,7 @@ import attr
 
 
 @attr.s
-class AttributeLoader(object):
+class AttributeLoader:
     """
     I load a test case by instantiating a class with a given attribute name.
 
@@ -22,7 +22,7 @@ class AttributeLoader(object):
 
 
 @attr.s
-class ModuleLoader(object):
+class ModuleLoader:
     """
     I load a test case by locating tests in the module with the given name.
     """

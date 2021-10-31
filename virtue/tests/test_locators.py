@@ -106,7 +106,6 @@ class TestObjectLocator(TestCase):
                 AttributeLoader(cls=module.Baz, attribute="test_bar"),
                 AttributeLoader(cls=module.Baz, attribute="test_baz"),
                 AttributeLoader(cls=module.Bar, attribute="test_foo"),
-                AttributeLoader(cls=module.OldStyle, attribute="test_old"),
             ],
         )
 

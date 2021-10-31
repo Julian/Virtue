@@ -11,7 +11,7 @@ class Foo(TestCase):
         pass
 
 
-class Bar(object):
+class Bar:
     def stuff(self):
         pass
 
@@ -19,19 +19,11 @@ class Bar(object):
         pass
 
 
-class Baz(object):
+class Baz:
     def test_bar(self):
         pass
 
     def test_baz(self):
-        pass
-
-
-class OldStyle:
-    def thing(self):
-        pass
-
-    def test_old(self):
         pass
 
 

@@ -7,7 +7,7 @@ from twisted.python.reflect import fullyQualifiedName as fully_qualified_name
 import attr
 
 
-class Outputter(object):
+class Outputter:
 
     _last_test_class = None
     _last_test_module = None
@@ -185,7 +185,7 @@ class Outputter(object):
 
 
 @attr.s
-class Counter(object):
+class Counter:
     """
     A counter is a recorder that does not hold references to tests it sees.
     """
@@ -227,7 +227,7 @@ class Counter(object):
 
 
 @attr.s
-class Recorder(object):
+class Recorder:
 
     errors = attr.ib(default=v())
     failures = attr.ib(default=v())
@@ -279,7 +279,7 @@ class Recorder(object):
 
 
 @attr.s
-class ComponentizedReporter(object):
+class ComponentizedReporter:
 
     outputter = attr.ib(default=attr.Factory(Outputter))
     recorder = attr.ib(default=attr.Factory(Recorder), repr=False)
