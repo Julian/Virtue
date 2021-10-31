@@ -68,8 +68,11 @@ class ObjectLocator:
     is_test_module = attr.ib(default=prefixed_by("test_"), repr=False)
 
     def __attrs_post_init__(self):
-        fn, self.is_test_class = self.is_test_class, lambda attr, cls: (
-            inspect.isclass(cls) and fn(attr, cls)
+        is_cls, self.is_test_class = self.is_test_class, lambda attr, cls: (
+            inspect.isclass(cls) and is_cls(attr, cls)
+        )
+        is_meth, self.is_test_method = self.is_test_method, lambda attr, val: (
+            callable(val) and is_meth(attr, val)
         )
 
     def locate_by_name(self, name):
@@ -155,5 +158,5 @@ class ObjectLocator:
         """
 
         for attribute, value in inspect.getmembers(cls):
-            if callable(value) and self.is_test_method(attribute, value):
+            if self.is_test_method(attribute, value):
                 yield AttributeLoader(cls=cls, attribute=attribute)

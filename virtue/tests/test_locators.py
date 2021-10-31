@@ -86,6 +86,22 @@ class TestObjectLocator(TestCase):
             ],
         )
 
+    def test_it_ignores_non_callable_test_methods(self):
+        locator = locators.ObjectLocator()
+
+        class ASampleTestCase(TestCase):
+            test_foo = 12
+
+            def test_bar(self):
+                pass
+
+        cases = locator.locate_in(ASampleTestCase)
+        self.assertEqual(
+            sorted(cases, key=attrgetter("attribute")), [
+                AttributeLoader(cls=ASampleTestCase, attribute="test_bar"),
+            ],
+        )
+
     def test_it_loads_methods_from_dynamically_created_test_case_classes(self):
         locator = locators.ObjectLocator()
         from virtue.tests.samples.dynamic_test import TestFoo
