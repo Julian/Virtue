@@ -10,6 +10,13 @@ on:
     - cron: '21 1 * * *'
 
 jobs:
+  pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v2
+    - uses: pre-commit/action@v2.0.0
+
   ci:
     runs-on: ${{ matrix.os }}
     strategy:
@@ -43,12 +50,12 @@ jobs:
             toxenv: py39-safety
           - name: 3.9
             toxenv: py39-tests
-          - name: 3.9
-            toxenv: readme
-          - name: 3.9
-            toxenv: secrets
-          - name: 3.9
-            toxenv: style
+          - name: "3.10"
+            toxenv: py310-build
+          - name: "3.10"
+            toxenv: py310-safety
+          - name: "3.10"
+            toxenv: py310-tests
           - name: 3.9
             toxenv: docs-dirhtml
           - name: 3.9
@@ -59,6 +66,12 @@ jobs:
             toxenv: docs-spelling
           - name: 3.9
             toxenv: docs-style
+          - name: 3.9
+            toxenv: readme
+          - name: 3.9
+            toxenv: secrets
+          - name: 3.9
+            toxenv: style
 
     steps:
     - uses: actions/checkout@v2
