@@ -239,6 +239,7 @@ class TestRunOutput(unittest.TestCase):
 
             ========================================
             [XFAIL]
+
             virtue.tests.samples.one_expected_failure.Foo.test_foo
             ----------------------------------------
             Ran 1 test in 0.000s
@@ -260,10 +261,6 @@ class TestRunOutput(unittest.TestCase):
                 test_spam ...                   [OK]
 
             ========================================
-            [UNEXPECTED SUCCESS]
-            virtue.tests.samples.failures_and_unexpected_passes.Foo.test_bar
-            virtue.tests.samples.failures_and_unexpected_passes.Foo.test_baz
-            ========================================
             [FAIL]
             Traceback (most recent call last):
               File "•unittest/case.py•", line •, in •
@@ -277,6 +274,9 @@ class TestRunOutput(unittest.TestCase):
             virtue.tests.samples.failures_and_unexpected_passes.Foo.test_foo
             ========================================
             [UNEXPECTED SUCCESS]
+
+            virtue.tests.samples.failures_and_unexpected_passes.Foo.test_bar
+            virtue.tests.samples.failures_and_unexpected_passes.Foo.test_baz
             virtue.tests.samples.failures_and_unexpected_passes.Foo.test_quux
             ----------------------------------------
             Ran 5 tests in 0.000s

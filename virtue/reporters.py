@@ -1,3 +1,4 @@
+from collections import defaultdict
 from time import time
 from traceback import format_exception
 import sys
@@ -24,8 +25,7 @@ class _DelayedMessage:
         yield self.status
         yield "\n"
         if self.body:
-            yield from self.body
-            yield "\n"
+            yield self.body
 
 
 class Outputter:
@@ -62,23 +62,33 @@ class Outputter:
             for attribute, _, text in self._COLORS:
                 setattr(self, attribute, text)
 
-        self._later = []
+        self._later = {
+            status: defaultdict(list) for status in [
+                self.SKIPPED,
+                self.EXPECTED_FAILURE,
+                self.FAIL,
+                self.UNEXPECTED_SUCCESS,
+                self.ERROR,
+            ]
+        }
 
     def _show_later(self, **kwargs):
-        self._later.append(_DelayedMessage(width=self.line_width, **kwargs))
+        message = _DelayedMessage(width=self.line_width, **kwargs)
+        self._later[message.status][message.body].append(message)
 
     def run_started(self):
         pass
 
     def run_stopped(self, recorder, runtime):
-        last = None, None
-        for i, each in enumerate(self._later):
-            yield "\n"
-            if (each.status, each.body) != last or i == len(self._later):
-                yield from each.lines()
-            yield _test_name(each.subject)
-
-            last = each.status, each.body
+        for status in self._later.values():
+            for messages in status.values():
+                if not messages:
+                    continue
+                yield "\n"
+                yield from messages[0].lines()
+                for message in messages:
+                    yield "\n"
+                    yield _test_name(message.subject)
 
         yield "\n"
         yield "-" * self.line_width
@@ -129,7 +139,7 @@ class Outputter:
     def test_errored(self, test, exc_info):
         self._show_later(
             status=self.ERROR,
-            body=format_exception(*exc_info),
+            body="".join(format_exception(*exc_info)),
             subject=test,
         )
         return self.format_line(test, self._error)
@@ -137,7 +147,7 @@ class Outputter:
     def test_failed(self, test, exc_info):
         self._show_later(
             status=self.FAIL,
-            body=format_exception(*exc_info),
+            body="".join(format_exception(*exc_info)),
             subject=test,
         )
         return self.format_line(test, self._fail)
