@@ -262,8 +262,6 @@ class TestRunOutput(unittest.TestCase):
             ========================================
             [UNEXPECTED SUCCESS]
             virtue.tests.samples.failures_and_unexpected_passes.Foo.test_bar
-            ========================================
-            [UNEXPECTED SUCCESS]
             virtue.tests.samples.failures_and_unexpected_passes.Foo.test_baz
             ========================================
             [FAIL]
@@ -284,5 +282,34 @@ class TestRunOutput(unittest.TestCase):
             Ran 5 tests in 0.000s
 
             FAILED (successes=1, failures=1, unexpected_successes=3)
+            """,
+        )
+
+    def test_output_is_compressed(self):
+        """
+        Albeit not sorted, so still not terribly reliably :/.
+        """
+        self.assertOutputIs(
+            tests=["virtue.tests.samples.repeated_similar_output"],
+            expected="""
+            virtue.tests.samples.repeated_similar_output
+              Foo
+                test_a ...                 [SKIPPED]
+                test_b ...                 [SKIPPED]
+                test_c ...                 [SKIPPED]
+
+            ========================================
+            [SKIPPED]
+            Skipped!
+            virtue.tests.samples.repeated_similar_output.Foo.test_a
+            ========================================
+            [SKIPPED]
+            Skipped 2!
+            virtue.tests.samples.repeated_similar_output.Foo.test_b
+            virtue.tests.samples.repeated_similar_output.Foo.test_c
+            ----------------------------------------
+            Ran 3 tests in 0.000s
+
+            PASSED (skips=3)
             """,
         )

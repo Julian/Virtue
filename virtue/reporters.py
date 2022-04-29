@@ -7,6 +7,27 @@ from twisted.python.reflect import fullyQualifiedName as fully_qualified_name
 import attr
 
 
+@attr.s
+class _DelayedMessage:
+    """
+    A test status message that will be shown at the end of a run.
+    """
+
+    width = attr.ib()
+    status = attr.ib()
+    subject = attr.ib()
+    body = attr.ib(default=())
+
+    def lines(self):
+        yield "=" * self.width
+        yield "\n"
+        yield self.status
+        yield "\n"
+        if self.body:
+            yield from self.body
+            yield "\n"
+
+
 class Outputter:
 
     _last_test_class = None
@@ -41,14 +62,24 @@ class Outputter:
             for attribute, _, text in self._COLORS:
                 setattr(self, attribute, text)
 
-        self._after = []
+        self._later = []
+
+    def _show_later(self, **kwargs):
+        self._later.append(_DelayedMessage(width=self.line_width, **kwargs))
 
     def run_started(self):
         pass
 
     def run_stopped(self, recorder, runtime):
-        for line in self._after:
-            yield line
+        last = None, None
+        for i, each in enumerate(self._later):
+            yield "\n"
+            if (each.status, each.body) != last or i == len(self._later):
+                yield from each.lines()
+            yield _test_name(each.subject)
+
+            last = each.status, each.body
+
         yield "\n"
         yield "-" * self.line_width
         tests = "tests" if recorder.testsRun != 1 else "test"
@@ -96,80 +127,31 @@ class Outputter:
         pass
 
     def test_errored(self, test, exc_info):
-        self._after.extend(
-            [
-                "\n",
-                "=" * self.line_width,
-                "\n",
-                self.ERROR,
-                "\n",
-            ] + format_exception(*exc_info) + [
-                "\n",
-                _test_name(test),
-            ],
+        self._show_later(
+            status=self.ERROR,
+            body=format_exception(*exc_info),
+            subject=test,
         )
         return self.format_line(test, self._error)
 
     def test_failed(self, test, exc_info):
-        self._after.extend(
-            [
-                "\n",
-                "=" * self.line_width,
-                "\n",
-                self.FAIL,
-                "\n",
-            ] + format_exception(*exc_info) + [
-                "\n",
-                _test_name(test),
-            ],
+        self._show_later(
+            status=self.FAIL,
+            body=format_exception(*exc_info),
+            subject=test,
         )
         return self.format_line(test, self._fail)
 
     def test_skipped(self, test, reason):
-        self._after.extend(
-            [
-                "\n",
-                "=" * self.line_width,
-                "\n",
-                self.SKIPPED,
-                "\n",
-                reason,
-                "\n",
-                fully_qualified_name(test.__class__),
-                ".",
-                test._testMethodName,
-            ],
-        )
+        self._show_later(status=self.SKIPPED, body=reason, subject=test)
         return self.format_line(test, self._skipped)
 
     def test_expectedly_failed(self, test, exc_info):
-        self._after.extend(
-            [
-                "\n",
-                "=" * self.line_width,
-                "\n",
-                self.EXPECTED_FAILURE,
-                "\n",
-                fully_qualified_name(test.__class__),
-                ".",
-                test._testMethodName,
-            ],
-        )
+        self._show_later(status=self.EXPECTED_FAILURE, subject=test)
         return self.format_line(test, self._expected_failure)
 
     def test_unexpectedly_succeeded(self, test):
-        self._after.extend(
-            [
-                "\n",
-                "=" * self.line_width,
-                "\n",
-                self.UNEXPECTED_SUCCESS,
-                "\n",
-                fully_qualified_name(test.__class__),
-                ".",
-                test._testMethodName,
-            ],
-        )
+        self._show_later(status=self.UNEXPECTED_SUCCESS, subject=test)
         return self.format_line(test, self._unexpected_success)
 
     def test_succeeded(self, test):
