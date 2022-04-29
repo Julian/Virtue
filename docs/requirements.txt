@@ -13,15 +13,15 @@ attrs==21.4.0
     #   virtue
 automat==20.2.0
     # via twisted
-babel==2.9.1
+babel==2.10.1
     # via sphinx
-beautifulsoup4==4.10.0
+beautifulsoup4==4.11.1
     # via furo
 certifi==2021.10.8
     # via requests
-charset-normalizer==2.0.11
+charset-normalizer==2.0.12
     # via requests
-click==8.0.3
+click==8.1.3
     # via virtue
 colorama==0.4.4
     # via virtue
@@ -29,7 +29,7 @@ constantly==15.1.0
     # via twisted
 docutils==0.17.1
     # via sphinx
-furo==2022.1.2
+furo==2022.4.7
     # via -r docs/requirements.in
 hyperlink==21.0.0
     # via twisted
@@ -41,26 +41,26 @@ imagesize==1.3.0
     # via sphinx
 incremental==21.3.0
     # via twisted
-jinja2==3.0.3
+jinja2==3.1.2
     # via sphinx
-markupsafe==2.0.1
+markupsafe==2.1.1
     # via jinja2
 packaging==21.3
     # via sphinx
 pyenchant==3.2.2
     # via sphinxcontrib-spelling
-pygments==2.11.2
+pygments==2.12.0
     # via
     #   furo
     #   pygments-github-lexers
     #   sphinx
 pygments-github-lexers==0.0.5
     # via -r docs/requirements.in
-pyparsing==3.0.7
+pyparsing==3.0.8
     # via packaging
 pyrsistent==0.18.1
     # via virtue
-pytz==2021.3
+pytz==2022.1
     # via babel
 requests==2.27.1
     # via sphinx
@@ -68,9 +68,9 @@ six==1.16.0
     # via automat
 snowballstemmer==2.2.0
     # via sphinx
-soupsieve==2.3.1
+soupsieve==2.3.2.post1
     # via beautifulsoup4
-sphinx==4.4.0
+sphinx==4.5.0
     # via
     #   -r docs/requirements.in
     #   furo
@@ -89,15 +89,15 @@ sphinxcontrib-serializinghtml==1.1.5
     # via sphinx
 sphinxcontrib-spelling==7.3.2
     # via -r docs/requirements.in
-twisted==22.1.0
+twisted==22.4.0
     # via virtue
-typing-extensions==4.0.1
+typing-extensions==4.2.0
     # via twisted
-urllib3==1.26.8
+urllib3==1.26.9
     # via requests
 file:.#egg=virtue
     # via -r docs/requirements.in
-zope.interface==5.4.0
+zope-interface==5.4.0
     # via twisted
 
 # The following packages are considered to be unsafe in a requirements file:
