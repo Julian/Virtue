@@ -1,14 +1,58 @@
 [build-system]
-requires = [
-    "setuptools>=40.6.0",
-    "setuptools_scm[toml]>=3.4",
-    "wheel",
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+source = "vcs"
+
+[project]
+name = "virtue"
+description = "After trial comes virtue. A test runner for good."
+readme = "README.rst"
+requires-python = ">=3.7"
+license = {text = "MIT"}
+keywords = ["testing", "tests", "test runner", "unittest"]
+authors = [
+  {email = "Julian+Virtue@GrayVines.com"},
+  {name = "Julian Berman"},
 ]
-build-backend = "setuptools.build_meta"
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.7",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+]
+dynamic = ["version"]
+
+dependencies = [
+  "attrs>=19",
+  "click",
+  "colorama",
+  "pyrsistent",
+  "twisted",
+
+  "importlib_metadata;python_version<'3.8'",
+]
+
+[project.scripts]
+virtue = "virtue._cli:main"
+
+[project.urls]
+homepage = "https://github.com/Julian/Virtue"
+documentation = "https://virtue.readthedocs.io/"
+issues = "https://github.com/Julian/Virtue/issues/"
+funding = "https://github.com/sponsors/Julian"
+source = "https://github.com/Julian/Virtue"
 
 [tool.isort]
 from_first = true
 include_trailing_comma = true
 multi_line_output = 3
-
-[tool.setuptools_scm]
