@@ -1,5 +1,6 @@
 # -*- encoding: utf-8 -*-
 from difflib import ndiff
+from io import StringIO
 from textwrap import dedent
 import os
 import re
@@ -8,7 +9,6 @@ import unittest
 from pyrsistent import v
 
 from virtue import runner
-from virtue.compat import StringIO
 from virtue.reporters import (
     ComponentizedReporter,
     Counter,
