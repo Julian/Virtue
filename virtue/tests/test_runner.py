@@ -174,24 +174,22 @@ class TestRunOutput(unittest.TestCase):
             ========================================
             [FAIL]
             Traceback (most recent call last):•
-              File "•unittest/case.py•", line •, in run•
-                •ethod()•
+              File "•unittest/case.py•", line •, in •
+                •
               File "•virtue/tests/samples/two_unsuccessful_tests.py•", line 14, in test_foo
                 self.fail("I fail too.")
-              File "•unittest/case.py•", line •, in fail
-                raise self.failureException(msg)
+              •
             AssertionError: I fail too.
 
             virtue.tests.samples.two_unsuccessful_tests.Bar.test_foo
             ========================================
             [FAIL]
             Traceback (most recent call last):•
-              File "•unittest/case.py•", line •, in run•
-                •ethod()•
+              File "•unittest/case.py•", line •, in •
+                •
               File "•virtue/tests/samples/two_unsuccessful_tests.py•", line 9, in test_bar
                 self.fail("I fail.")
-              File "•unittest/case.py•", line •, in fail
-                raise self.failureException(msg)
+              •
             AssertionError: I fail.
 
             virtue.tests.samples.two_unsuccessful_tests.Foo.test_bar
@@ -267,8 +265,7 @@ class TestRunOutput(unittest.TestCase):
                 •
               File "•/failures_and_unexpected_passes.py•", line •, in test_foo
                 self.fail("Nope!")
-              File "•unittest/case.py•", line •, in fail
-                raise self.failureException(msg)
+              •
             AssertionError: Nope!
 
             virtue.tests.samples.failures_and_unexpected_passes.Foo.test_foo
