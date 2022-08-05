@@ -1,6 +1,10 @@
 from textwrap import dedent
 
-from twisted.python.reflect import namedAny as named_any
+try:
+    from pkgutil import resolve_name
+except ImportError:
+    from pkgutil_resolve_name import resolve_name
+
 import click
 import twisted.trial.reporter
 
@@ -30,8 +34,8 @@ class _Reporter(click.ParamType):
         Reporter = self._BUILT_IN.get(value)
         if Reporter is None:
             try:
-                Reporter = named_any(value)
-            except Exception:
+                Reporter = resolve_name(value)
+            except (ValueError, ImportError, AttributeError):
                 raise click.BadParameter(f"{value!r} is not a known reporter")
 
         return Reporter()

@@ -163,7 +163,7 @@ class TestObjectLocator(TestCase):
         )
 
     def test_it_knows_what_it_does_not_know(self):
-        with self.assertRaises(ValueError):
+        with self.assertRaises(locators.UnableToLoad):
             locators.ObjectLocator().locate_in(object())
 
     def create_package_with_tests(self, locator):

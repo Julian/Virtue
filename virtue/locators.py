@@ -1,14 +1,21 @@
 from unittest import TestCase
 import inspect
 
+try:
+    from pkgutil import resolve_name
+except ImportError:
+    from pkgutil_resolve_name import resolve_name
+
 from twisted.python.modules import getModule as get_module
-from twisted.python.reflect import ModuleNotFound, ObjectNotFound
 from twisted.python.reflect import fullyQualifiedName as fully_qualified_name
-from twisted.python.reflect import namedAny as named_any
 from twisted.trial.runner import filenameToModule as filename_to_module
 import attr
 
 from virtue.loaders import AttributeLoader, ModuleLoader
+
+
+class UnableToLoad(Exception):
+    pass
 
 
 def prefixed_by(prefix):
@@ -89,8 +96,8 @@ class ObjectLocator:
         """
 
         try:
-            obj = named_any(name)
-        except (ModuleNotFound, ObjectNotFound):
+            obj = resolve_name(name)
+        except ValueError:
             try:
                 obj = filename_to_module(name)
             except ValueError as error:
@@ -98,15 +105,15 @@ class ObjectLocator:
 
         try:
             return self.locate_in(obj)
-        except ValueError:
+        except UnableToLoad:
             fqon = fully_qualified_name(obj)
             class_name, _, method_name = fqon.rpartition(".")
 
             try:
-                cls = named_any(class_name)
-            except AttributeError:
+                cls = resolve_name(class_name)
+            except ValueError:
                 class_name, _, method_name = name.rpartition(".")
-                cls = named_any(class_name)
+                cls = resolve_name(class_name)
                 if inspect.isclass(cls):
                     return [AttributeLoader(cls=cls, attribute=method_name)]
             else:
@@ -129,7 +136,7 @@ class ObjectLocator:
         elif inspect.isclass(obj):
             return self.locate_in_class(obj)
         else:
-            raise ValueError(
+            raise UnableToLoad(
                 f"Can't determine the appropriate way to load {obj!r}",
             )
 
