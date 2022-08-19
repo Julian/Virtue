@@ -106,8 +106,7 @@ class ObjectLocator:
         try:
             return self.locate_in(obj)
         except UnableToLoad:
-            fqon = fully_qualified_name(obj)
-            class_name, _, method_name = fqon.rpartition(".")
+            class_name, _, method_name = name.rpartition(".")
 
             try:
                 cls = resolve_name(class_name)
@@ -119,6 +118,14 @@ class ObjectLocator:
             else:
                 if inspect.isclass(cls):
                     return [AttributeLoader(cls=cls, attribute=method_name)]
+
+            # Aliased attributes
+            fqon = fully_qualified_name(obj)
+            class_name, _, method_name = fqon.rpartition(".")
+            cls = resolve_name(class_name)
+            if inspect.isclass(cls):
+                return [AttributeLoader(cls=cls, attribute=method_name)]
+
             raise
 
     def locate_in(self, obj):
