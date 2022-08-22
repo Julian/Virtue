@@ -1,7 +1,7 @@
 from collections import defaultdict
-from time import time
 from traceback import format_exception
 import sys
+import time
 
 from pyrsistent import v
 from twisted.python.reflect import fullyQualifiedName as fully_qualified_name
@@ -273,10 +273,10 @@ class Recorder:
 @attr.s
 class ComponentizedReporter:
 
-    outputter = attr.ib(default=attr.Factory(Outputter))
-    recorder = attr.ib(default=attr.Factory(Recorder), repr=False)
+    outputter = attr.ib(factory=Outputter)
+    recorder = attr.ib(factory=Recorder, repr=False)
     stream = attr.ib(default=sys.stdout)
-    _time = attr.ib(default=time, repr=False)
+    _time = attr.ib(default=time.time, repr=False)
 
     shouldStop = False
 
@@ -351,7 +351,4 @@ def _test_name(test):
             a test case instance
 
     """
-
-    return ".".join(
-        (fully_qualified_name(test.__class__), test._testMethodName),
-    )
+    return f"{fully_qualified_name(test.__class__)}.{test._testMethodName}"
