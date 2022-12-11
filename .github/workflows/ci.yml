@@ -14,8 +14,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - uses: actions/setup-python@v3
-    - uses: pre-commit/action@v2.0.3
+    - uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+    - uses: pre-commit/action@v3.0.0
 
   ci:
     runs-on: ${{ matrix.os }}
@@ -24,58 +26,63 @@ jobs:
       matrix:
         os: [macos-latest, ubuntu-latest]
         python-version:
-          - name: pypy-3.8
+          - name: pypy-3.9
             toxenv: pypy3-build
-          - name: pypy-3.8
-            toxenv: pypy3-safety
-          - name: pypy-3.8
+          - name: pypy-3.9
+            toxenv: pypy3-audit
+          - name: pypy-3.9
             toxenv: pypy3-tests
           - name: 3.7
             toxenv: py37-build
           - name: 3.7
-            toxenv: py37-safety
+            toxenv: py37-audit
           - name: 3.7
             toxenv: py37-tests
           - name: 3.8
             toxenv: py38-build
           - name: 3.8
-            toxenv: py38-safety
+            toxenv: py38-audit
           - name: 3.8
             toxenv: py38-tests
           - name: 3.9
             toxenv: py39-build
           - name: 3.9
-            toxenv: py39-safety
+            toxenv: py39-audit
           - name: 3.9
             toxenv: py39-tests
           - name: "3.10"
             toxenv: py310-build
           - name: "3.10"
-            toxenv: py310-safety
+            toxenv: py310-audit
           - name: "3.10"
             toxenv: py310-tests
-          - name: "3.11.0-beta - 3.11.0"
+          - name: "3.11"
             toxenv: py311-build
-          - name: "3.11.0-beta - 3.11.0"
-            toxenv: py311-safety
-          - name: "3.11.0-beta - 3.11.0"
+          - name: "3.11"
+            toxenv: py311-audit
+          - name: "3.11"
             toxenv: py311-tests
-          - name: "3.10"
+          - name: "3.11"
             toxenv: docs-dirhtml
-          - name: "3.10"
+          - name: "3.11"
             toxenv: docs-doctest
-          - name: "3.10"
+          - name: "3.11"
             toxenv: docs-linkcheck
-          - name: "3.10"
+          - name: "3.11"
             toxenv: docs-spelling
-          - name: "3.10"
+          - name: "3.11"
             toxenv: docs-style
-          - name: "3.10"
+          - name: "3.11"
             toxenv: readme
-          - name: "3.10"
+          - name: "3.11"
             toxenv: secrets
-          - name: "3.10"
+          - name: "3.11"
             toxenv: style
+        include:
+          - os: ubuntu-latest
+            python-version:
+              name: "3.11"
+              toxenv: py311-ghcoverage
 
     steps:
     - uses: actions/checkout@v3
@@ -113,7 +120,7 @@ jobs:
         path: dist
     - name: Publish package
       if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
-      uses: pypa/gh-action-pypi-publish@master
+      uses: pypa/gh-action-pypi-publish@release/v1
       with:
         user: __token__
         password: ${{ secrets.pypi_password }}

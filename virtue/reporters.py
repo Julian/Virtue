@@ -4,7 +4,6 @@ import sys
 import time
 
 from pyrsistent import m, v
-from twisted.python.reflect import fullyQualifiedName as fully_qualified_name
 import attr
 
 
@@ -291,7 +290,7 @@ class Recorder:
     def testsRun(self):
         fields = attr.astuple(
             self,
-            filter=lambda f, _: not f.name.startswith("subtest_")
+            filter=lambda f, _: not f.name.startswith("subtest_"),
         )
         # It seems addSuccess is called for tests with all passing subtests
         # but the reverse isn't true if a subtest fails...
@@ -347,17 +346,17 @@ class Recorder:
         if outcome is None:
             self.subtest_successes = self.subtest_successes.set(
                 test,
-                self.subtest_successes.get(test, v()).append(subtest)
+                self.subtest_successes.get(test, v()).append(subtest),
             )
         elif issubclass(outcome[0], test.failureException):
             self.subtest_failures = self.subtest_failures.set(
                 test,
-                self.subtest_failures.get(test, v()).append(subtest)
+                self.subtest_failures.get(test, v()).append(subtest),
             )
         else:
             self.subtest_errors = self.subtest_errors.set(
                 test,
-                self.subtest_errors.get(test, v()).append(subtest)
+                self.subtest_errors.get(test, v()).append(subtest),
             )
 
     def wasSuccessful(self):
