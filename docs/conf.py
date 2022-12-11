@@ -29,6 +29,12 @@ html_theme = "furo"
 
 # = Builders =
 
+nitpick_ignore = [
+    # Missing from pyrsistent docs
+    ("py:class", "pyrsistent.typing.PMap"),
+    ("py:class", "pyrsistent.typing.PVector"),
+]
+
 
 def entire_domain(host):
     return r"http.?://" + re.escape(host) + r"($|/.*)"

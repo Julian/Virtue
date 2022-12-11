@@ -6,7 +6,7 @@ import itertools
 from attrs import field, frozen
 
 if TYPE_CHECKING:
-    from twisted.python.modules import PythonModule
+    import twisted.python.modules
 
     from virtue.locators import ObjectLocator
 
@@ -36,7 +36,7 @@ class ModuleLoader:
     """
 
     locator: ObjectLocator = field(repr=False)
-    module: PythonModule
+    module: twisted.python.modules.PythonModule
 
     def load(self):
         class_loaders = self.locator.locate_in_module(self.module.load())
