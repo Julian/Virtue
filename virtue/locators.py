@@ -4,12 +4,12 @@ import inspect
 try:
     from pkgutil import resolve_name
 except ImportError:
-    from pkgutil_resolve_name import resolve_name
+    from pkgutil_resolve_name import resolve_name  # type: ignore
 
+from attrs import define, field
 from twisted.python.modules import getModule as get_module
 from twisted.python.reflect import fullyQualifiedName as fully_qualified_name
 from twisted.trial.runner import filenameToModule as filename_to_module
-import attr
 
 from virtue.loaders import AttributeLoader, ModuleLoader
 
@@ -39,7 +39,7 @@ def inherits_from_TestCase(attr, cls):
     return issubclass(cls, TestCase)
 
 
-@attr.s
+@define
 class ObjectLocator:
     """
     I locate test cases on an object: a package, module or test class.
@@ -68,11 +68,11 @@ class ObjectLocator:
     """
 
     #: Whether an object is a test method or not
-    is_test_method = attr.ib(default=prefixed_by("test"), repr=False)
+    is_test_method = field(default=prefixed_by("test"), repr=False)
     #: Whether an object is a test class or not
-    is_test_class = attr.ib(default=inherits_from_TestCase, repr=False)
+    is_test_class = field(default=inherits_from_TestCase, repr=False)
     #: Whether an object is a test module or not
-    is_test_module = attr.ib(default=prefixed_by("test_"), repr=False)
+    is_test_module = field(default=prefixed_by("test_"), repr=False)
 
     def __attrs_post_init__(self):
         is_cls, self.is_test_class = self.is_test_class, lambda attr, cls: (

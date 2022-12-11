@@ -3,7 +3,7 @@ from textwrap import dedent
 try:
     from pkgutil import resolve_name
 except ImportError:
-    from pkgutil_resolve_name import resolve_name
+    from pkgutil_resolve_name import resolve_name  # type: ignore
 
 import click
 import twisted.trial.reporter

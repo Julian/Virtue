@@ -1,9 +1,17 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Type
 import itertools
 
-import attr
+from attrs import field, frozen
+
+if TYPE_CHECKING:
+    from twisted.python.modules import PythonModule
+
+    from virtue.locators import ObjectLocator
 
 
-@attr.s
+@frozen
 class AttributeLoader:
     """
     I load a test case by instantiating a class with a given attribute name.
@@ -14,21 +22,21 @@ class AttributeLoader:
     selected test method).
     """
 
-    cls = attr.ib()
-    attribute = attr.ib()
+    cls: Type
+    attribute: str
 
     def load(self):
         return [self.cls(self.attribute)]
 
 
-@attr.s
+@frozen
 class ModuleLoader:
     """
     I load a test case by locating tests in the module with the given name.
     """
 
-    locator = attr.ib(repr=False)
-    module = attr.ib()
+    locator: ObjectLocator = field(repr=False)
+    module: PythonModule
 
     def load(self):
         class_loaders = self.locator.locate_in_module(self.module.load())

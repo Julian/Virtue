@@ -4,19 +4,20 @@ import sys
 import time
 
 from pyrsistent import m, v
-import attr
+from pyrsistent.typing import PMap, PVector
+import attrs
 
 
-@attr.s
+@attrs.frozen
 class _DelayedMessage:
     """
     A test status message that will be shown at the end of a run.
     """
 
-    width = attr.ib()
-    status = attr.ib()
-    subject = attr.ib()
-    body = attr.ib(default=())
+    width: int
+    status: str
+    subject: str
+    body: str = ""
 
     def lines(self):
         yield "=" * self.width
@@ -216,27 +217,27 @@ class Outputter:
         return left + " " * space + right
 
 
-@attr.s
+@attrs.define(slots=False)
 class Counter:
     """
     A counter is a recorder that does not hold references to tests it sees.
     """
 
-    errors = attr.ib(default=0)
-    failures = attr.ib(default=0)
-    expected_failures = attr.ib(default=0)
-    unexpected_successes = attr.ib(default=0)
-    successes = attr.ib(default=0)
+    errors: int = 0
+    failures: int = 0
+    expected_failures: int = 0
+    unexpected_successes: int = 0
+    successes: int = 0
 
-    subtest_successes = attr.ib(default=0)
-    subtest_failures = attr.ib(default=0)
-    subtest_errors = attr.ib(default=0)
+    subtest_successes: int = 0
+    subtest_failures: int = 0
+    subtest_errors: int = 0
 
     shouldStop = False
 
     @property
     def count(self):
-        return sum(attr.astuple(self))
+        return sum(attrs.astuple(self))
 
     testsRun = count
 
@@ -270,25 +271,25 @@ class Counter:
             self.subtest_errors += 1
 
 
-@attr.s
+@attrs.define(slots=False)
 class Recorder:
 
-    errors = attr.ib(default=v())
-    failures = attr.ib(default=v())
-    skips = attr.ib(default=v())
-    successes = attr.ib(default=v())
-    expected_failures = attr.ib(default=v())
-    unexpected_successes = attr.ib(default=v())
+    errors: PVector = v()
+    failures: PVector = v()
+    skips: PVector = v()
+    successes: PVector = v()
+    expected_failures: PVector = v()
+    unexpected_successes: PVector = v()
 
-    subtest_successes = attr.ib(default=m())
-    subtest_failures = attr.ib(default=m())
-    subtest_errors = attr.ib(default=m())
+    subtest_successes: PMap = m()
+    subtest_failures: PMap = m()
+    subtest_errors: PMap = m()
 
     shouldStop = False
 
     @property
     def testsRun(self):
-        fields = attr.astuple(
+        fields = attrs.astuple(
             self,
             filter=lambda f, _: not f.name.startswith("subtest_"),
         )
@@ -369,13 +370,13 @@ class Recorder:
         )
 
 
-@attr.s
+@attrs.define(slots=False)
 class ComponentizedReporter:
 
-    outputter = attr.ib(factory=Outputter)
-    recorder = attr.ib(factory=Recorder, repr=False)
-    stream = attr.ib(default=sys.stdout)
-    _time = attr.ib(default=time.time, repr=False)
+    outputter: Outputter = attrs.field(factory=Outputter)
+    recorder = attrs.field(factory=Recorder, repr=False)
+    stream = attrs.field(default=sys.stdout)
+    _time = attrs.field(default=time.time, repr=False)
 
     failfast = False  # FIXME: needed for subtests?
     shouldStop = False
