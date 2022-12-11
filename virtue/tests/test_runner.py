@@ -42,6 +42,17 @@ class TestRun(unittest.TestCase):
         )
         self.assertEqual(result, Counter(unexpected_successes=1))
 
+    def test_it_runs_subtests(self):
+        result = runner.run(tests=["virtue.tests.samples.subtests"])
+        self.assertEqual(
+            result, Counter(
+                subtest_failures=1,
+                subtest_successes=4,
+                successes=3,
+                errors=1,
+            ),
+        )
+
     def test_it_can_stop_short(self):
         """
         Ooo, I stopped short.
@@ -280,6 +291,48 @@ class TestRunOutput(unittest.TestCase):
 
             FAILED (successes=1, failures=1, unexpected_successes=3)
             """,
+        )
+
+    def test_subtests(self):
+        self.assertOutputIs(
+            tests=["virtue.tests.samples.subtests"],
+            expected="""
+            virtue.tests.samples.subtests
+              Baz
+                test_passing_nested_subtest ... [OK]
+                test_passing_subtest ...        [OK]
+              Foo
+                test_no_subtests ...            [OK]
+                test_subtests_one_fail_one_error
+                  i=1 ...                     [FAIL]
+                  i=3 ...                    [ERROR]
+
+            ========================================
+            [FAIL]
+            Traceback (most recent call last):
+              File "•unittest/case.py•", line •, in •
+                •
+              File "•/subtests.py•", line •, in test_subtests_one_fail_one_error
+                self.fail("Fail!")
+              •
+            AssertionError: Fail!
+
+            virtue.tests.samples.subtests.Foo.test_subtests_one_fail_one_error (i=1)
+            ========================================
+            [ERROR]
+            Traceback (most recent call last):
+              File "•unittest/case.py•", line •, in •
+                •
+              File "•/subtests.py•", line •, in test_subtests_one_fail_one_error
+                raise ZeroDivisionError()•
+            ZeroDivisionError•
+
+            virtue.tests.samples.subtests.Foo.test_subtests_one_fail_one_error (i=3)
+            ----------------------------------------
+            Ran 4 tests with 7 subtests in 0.000s
+
+            FAILED (successes=3, subtest_failures=1, subtest_errors=1)
+            """,  # noqa: E501
         )
 
     def test_output_is_compressed(self):

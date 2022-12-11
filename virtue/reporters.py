@@ -3,7 +3,7 @@ from traceback import format_exception
 import sys
 import time
 
-from pyrsistent import v
+from pyrsistent import m, v
 from twisted.python.reflect import fullyQualifiedName as fully_qualified_name
 import attr
 
@@ -32,6 +32,7 @@ class Outputter:
 
     _last_test_class = None
     _last_test_module = None
+    _current_subtests_test = None
 
     FAILED, PASSED = "FAILED", "PASSED"
     ERROR, FAIL, OK, SKIPPED = "[ERROR]", "[FAIL]", "[OK]", "[SKIPPED]"
@@ -88,12 +89,22 @@ class Outputter:
                 yield from messages[0].lines()
                 for message in messages:
                     yield "\n"
-                    yield _test_name(message.subject)
+                    yield message.subject.id()
 
         yield "\n"
         yield "-" * self.line_width
-        tests = "tests" if recorder.testsRun != 1 else "test"
-        yield f"\nRan {recorder.testsRun} {tests} in {runtime:.3f}s\n\n"
+
+        count = recorder.testsRun
+        tests = "tests" if count != 1 else "test"
+
+        subcount = recorder.subtests
+        if subcount:
+            pluralized = "subtests" if subcount != 1 else "subtest"
+            subtests = f" with {subcount} {pluralized}"
+        else:
+            subtests = ""
+
+        yield f"\nRan {count} {tests}{subtests} in {runtime:.3f}s\n\n"
         if recorder.wasSuccessful():
             yield self._passed
         else:
@@ -109,6 +120,8 @@ class Outputter:
                 "errors",
                 "expected_failures",
                 "unexpected_successes",
+                "subtest_failures",
+                "subtest_errors",
             ):
                 subcount = len(getattr(recorder, attribute))
                 if subcount:
@@ -167,9 +180,37 @@ class Outputter:
     def test_succeeded(self, test):
         return self.format_line(test, self._ok)
 
+    def subtest_succeeded(self, test, subtest):
+        pass
+
+    def subtest_failed(self, test, subtest, exc_info):
+        self._show_later(
+            status=self.FAIL,
+            body="".join(format_exception(*exc_info)),
+            subject=subtest,
+        )
+        return self.format_subtest_result(test, subtest, self._fail)
+
+    def subtest_errored(self, test, subtest, exc_info):
+        self._show_later(
+            status=self.ERROR,
+            body="".join(format_exception(*exc_info)),
+            subject=subtest,
+        )
+        return self.format_subtest_result(test, subtest, self._error)
+
     def format_line(self, test, result):
         before = f"{self.indent}{self.indent}{test._testMethodName} ..."
         return self._pad_center(left=before, right=result) + "\n"
+
+    def format_subtest_result(self, test, subtest, result):
+        if self._current_subtests_test != test.id():
+            before = f"{self.indent}{self.indent}{test._testMethodName}\n"
+        else:
+            before = ""
+        self._current_subtests_test = test.id()
+        line = f"{self.indent * 3}{subtest._subDescription()[1:-1]} ..."
+        return f"{before}{self._pad_center(left=line, right=result)}\n"
 
     def _pad_center(self, left, right):
         space = self.line_width - len(left) - len(right)
@@ -187,6 +228,10 @@ class Counter:
     expected_failures = attr.ib(default=0)
     unexpected_successes = attr.ib(default=0)
     successes = attr.ib(default=0)
+
+    subtest_successes = attr.ib(default=0)
+    subtest_failures = attr.ib(default=0)
+    subtest_errors = attr.ib(default=0)
 
     shouldStop = False
 
@@ -217,6 +262,14 @@ class Counter:
     def addSuccess(self, test):
         self.successes += 1
 
+    def addSubTest(self, test, subtest, outcome):
+        if outcome is None:
+            self.subtest_successes += 1
+        elif issubclass(outcome[0], test.failureException):
+            self.subtest_failures += 1
+        else:
+            self.subtest_errors += 1
+
 
 @attr.s
 class Recorder:
@@ -228,11 +281,35 @@ class Recorder:
     expected_failures = attr.ib(default=v())
     unexpected_successes = attr.ib(default=v())
 
+    subtest_successes = attr.ib(default=m())
+    subtest_failures = attr.ib(default=m())
+    subtest_errors = attr.ib(default=m())
+
     shouldStop = False
 
     @property
     def testsRun(self):
-        return sum(len(tests) for tests in attr.astuple(self))
+        fields = attr.astuple(
+            self,
+            filter=lambda f, _: not f.name.startswith("subtest_")
+        )
+        # It seems addSuccess is called for tests with all passing subtests
+        # but the reverse isn't true if a subtest fails...
+        tests_with_subtests = len(self.subtest_failures | self.subtest_errors)
+        return sum(len(each) for each in fields) + tests_with_subtests
+
+    @property
+    def subtests(self):
+        return sum(
+            1
+            for each in (
+                self.subtest_successes,
+                self.subtest_failures,
+                self.subtest_errors,
+            )
+            for value in each.values()
+            for _ in value
+        )
 
     def startTestRun(self):
         pass
@@ -260,14 +337,37 @@ class Recorder:
     def addSkip(self, test, reason):
         self.skips = self.skips.append(test)
 
-    def addSuccess(self, test):
-        self.successes = self.successes.append(test)
-
     def addUnexpectedSuccess(self, test):
         self.unexpected_successes = self.unexpected_successes.append(test)
 
+    def addSuccess(self, test):
+        self.successes = self.successes.append(test)
+
+    def addSubTest(self, test, subtest, outcome):
+        if outcome is None:
+            self.subtest_successes = self.subtest_successes.set(
+                test,
+                self.subtest_successes.get(test, v()).append(subtest)
+            )
+        elif issubclass(outcome[0], test.failureException):
+            self.subtest_failures = self.subtest_failures.set(
+                test,
+                self.subtest_failures.get(test, v()).append(subtest)
+            )
+        else:
+            self.subtest_errors = self.subtest_errors.set(
+                test,
+                self.subtest_errors.get(test, v()).append(subtest)
+            )
+
     def wasSuccessful(self):
-        return not (self.errors or self.failures or self.unexpected_successes)
+        return not (
+            self.errors
+            or self.failures
+            or self.unexpected_successes
+            or self.subtest_failures
+            or self.subtest_errors
+        )
 
 
 @attr.s
@@ -278,6 +378,7 @@ class ComponentizedReporter:
     stream = attr.ib(default=sys.stdout)
     _time = attr.ib(default=time.time, repr=False)
 
+    failfast = False  # FIXME: needed for subtests?
     shouldStop = False
 
     @property
@@ -336,19 +437,15 @@ class ComponentizedReporter:
         self.recorder.addSuccess(test)
         self.stream.writelines(self.outputter.test_succeeded(test) or "")
 
+    def addSubTest(self, test, subtest, outcome):
+        self.recorder.addSubTest(test, subtest, outcome)
+        if outcome is None:
+            output = self.outputter.subtest_succeeded(test, subtest)
+        elif issubclass(outcome[0], test.failureException):
+            output = self.outputter.subtest_failed(test, subtest, outcome)
+        else:
+            output = self.outputter.subtest_errored(test, subtest, outcome)
+        self.stream.writelines(output or "")
+
     def wasSuccessful(self):
         return self.recorder.wasSuccessful()
-
-
-def _test_name(test):
-    """
-    Retrieve the name of the given test.
-
-    Arguments:
-
-        test (TestCase):
-
-            a test case instance
-
-    """
-    return f"{fully_qualified_name(test.__class__)}.{test._testMethodName}"
