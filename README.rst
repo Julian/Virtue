@@ -20,9 +20,9 @@ Virtue
   :alt: ReadTheDocs status
   :target: https://virtue.readthedocs.io/en/stable/
 
-.. |Precommit| image:: https://results.pre-commit.ci/badge/github/Julian/virtue/main.svg
+.. |Precommit| image:: https://results.pre-commit.ci/badge/github/Julian/Virtue/main.svg
    :alt: pre-commit.ci status
-   :target: https://results.pre-commit.ci/latest/github/Julian/virtue/main
+   :target: https://results.pre-commit.ci/latest/github/Julian/Virtue/main
 
 
 ``virtue`` is a modern, extensible,
