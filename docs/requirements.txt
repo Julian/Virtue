@@ -17,7 +17,7 @@ babel==2.11.0
     # via sphinx
 beautifulsoup4==4.11.1
     # via furo
-certifi==2022.9.24
+certifi==2022.12.7
     # via requests
 charset-normalizer==2.1.1
     # via requests
@@ -29,7 +29,7 @@ constantly==15.1.0
     # via twisted
 docutils==0.19
     # via sphinx
-furo==2022.9.29
+furo==2022.12.7
     # via -r docs/requirements.in
 hyperlink==21.0.0
     # via twisted
@@ -45,7 +45,7 @@ jinja2==3.1.2
     # via sphinx
 markupsafe==2.1.1
     # via jinja2
-packaging==21.3
+packaging==22.0
     # via sphinx
 pyenchant==3.2.2
     # via sphinxcontrib-spelling
@@ -56,8 +56,6 @@ pygments==2.13.0
     #   sphinx
 pygments-github-lexers==0.0.5
     # via -r docs/requirements.in
-pyparsing==3.0.9
-    # via packaging
 pyrsistent==0.19.2
     # via virtue
 pytz==2022.6
@@ -96,7 +94,7 @@ twisted==22.10.0
     # via virtue
 typing-extensions==4.4.0
     # via twisted
-urllib3==1.26.12
+urllib3==1.26.13
     # via requests
 file:.#egg=virtue
     # via -r docs/requirements.in
