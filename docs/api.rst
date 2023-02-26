@@ -5,13 +5,6 @@ API Reference
    :members:
    :undoc-members:
 
-``virtue.core``
----------------
-
-.. automodule:: virtue.core
-   :members:
-   :undoc-members:
-
 ``virtue.loaders``
 ------------------
 
