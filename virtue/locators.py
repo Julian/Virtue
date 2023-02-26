@@ -1,3 +1,6 @@
+"""
+Loaders find tests which are referenced by names, preparing them for running.
+"""
 from unittest import TestCase
 import inspect
 
@@ -15,7 +18,9 @@ from virtue.loaders import AttributeLoader, ModuleLoader
 
 
 class UnableToLoad(Exception):
-    pass
+    """
+    A test couldn't be loaded.
+    """
 
 
 def prefixed_by(prefix):
@@ -37,6 +42,9 @@ def prefixed_by(prefix):
 
 
 def inherits_from_TestCase(attr, cls):
+    """
+    Return true if a class inherits from `unittest.TestCase`.
+    """
     return issubclass(cls, TestCase)
 
 
@@ -95,7 +103,6 @@ class ObjectLocator:
         modification will be done, so the file must be importable
         without modification.
         """
-
         try:
             obj = resolve_name(name)
         except ValueError:
@@ -133,7 +140,6 @@ class ObjectLocator:
         """
         Attempt to locate the test cases in the given object (of any kind).
         """
-
         # We don't use inspect.getmembers because its predicate only
         # takes the value, not the attr name.
         if inspect.ismodule(obj):
@@ -152,7 +158,6 @@ class ObjectLocator:
         """
         Locate all of the test cases contained in the given package.
         """
-
         for module in get_module(package.__name__).walkModules():
             _, _, name = module.name.rpartition(".")
             if self.is_test_module(name):
@@ -162,7 +167,6 @@ class ObjectLocator:
         """
         Locate all of the test cases contained in the given module.
         """
-
         for attribute, value in inspect.getmembers(module):
             if self.is_test_class(attribute, value):
                 yield from self.locate_in_class(value)
@@ -171,7 +175,6 @@ class ObjectLocator:
         """
         Locate the methods on the given class that are test cases.
         """
-
         for attribute, value in inspect.getmembers(cls):
             if self.is_test_method(attribute, value):
                 yield AttributeLoader(cls=cls, attribute=attribute)

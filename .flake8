@@ -1,10 +1,22 @@
 [flake8]
 ban-relative-imports = true
 inline-quotes = "
+exclude = virtue/tests/samples
+per-file-ignores =
+    noxfile.py:D
+    docs/conf.py:D
+    virtue/reporters.py:D
+    virtue/tests/*:D
 ignore =
     # Barring function calls in default args. Ha, no.
     B008,
     # See https://github.com/PyCQA/flake8-bugbear/issues/131
     B306,
+    # It's fine for some magic methods to not have docstrings.
+    D105,
+    # This rule makes diffs uglier when expanding docstrings (and it's uglier)
+    D200,
+    # Plz spaces after section headers
+    D412,
     # (flake8 default) old PEP8 boolean operator line breaks
     W503,

@@ -1,3 +1,6 @@
+"""
+Runners execute loaded tests.
+"""
 import unittest
 import warnings
 
@@ -27,7 +30,6 @@ def run(tests=(), reporter=None, stop_after=None):
 
             a number of non-successful tests to allow before stopping the run.
     """
-
     if reporter is None:
         reporter = Counter()
     if stop_after is not None:

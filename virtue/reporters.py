@@ -1,3 +1,6 @@
+"""
+Outputting and reporting for virtuous test runs.
+"""
 from collections import defaultdict
 from traceback import format_exception
 import sys

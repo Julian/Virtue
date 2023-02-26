@@ -1,3 +1,6 @@
+"""
+Loaders take a named test case and load the test appropriately.
+"""
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -26,6 +29,9 @@ class AttributeLoader:
     attribute: str
 
     def load(self):
+        """
+        Load as a single test.
+        """
         return [self.cls(self.attribute)]
 
 
@@ -39,6 +45,9 @@ class ModuleLoader:
     module: twisted.python.modules.PythonModule
 
     def load(self):
+        """
+        Load all test cases in the module.
+        """
         class_loaders = self.locator.locate_in_module(self.module.load())
         return itertools.chain.from_iterable(
             class_loader.load() for class_loader in class_loaders
