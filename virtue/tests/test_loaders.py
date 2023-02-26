@@ -29,7 +29,8 @@ class TestAttributeLoader(TestCase):
 
     def test_repr(self):
         loader = loaders.AttributeLoader(
-            cls=self.__class__, attribute="test_repr",
+            cls=self.__class__,
+            attribute="test_repr",
         )
         self.assertEqual(
             repr(loader),
@@ -38,7 +39,6 @@ class TestAttributeLoader(TestCase):
 
 
 class TestModuleLoader(TestCase):
-
     locator = locators.ObjectLocator()
 
     def test_it_loads_modules(self):
@@ -47,7 +47,8 @@ class TestModuleLoader(TestCase):
 
         cases = module.load()
         self.assertEqual(
-            list(loader.load()), [
+            list(loader.load()),
+            [
                 cases.Baz("test_bar"),
                 cases.Baz("test_baz"),
                 cases.Foo("test_foo"),
@@ -58,15 +59,18 @@ class TestModuleLoader(TestCase):
         virtue, os = get_module("virtue"), get_module("os")
         loader = loaders.ModuleLoader(locator=self.locator, module=virtue)
         self.assertEqual(
-            loader, loaders.ModuleLoader(locator=self.locator, module=virtue),
+            loader,
+            loaders.ModuleLoader(locator=self.locator, module=virtue),
         )
         self.assertNotEqual(
-            loader, loaders.ModuleLoader(locator=self.locator, module=os),
+            loader,
+            loaders.ModuleLoader(locator=self.locator, module=os),
         )
 
     def test_repr(self):
         virtue = get_module("virtue")
         loader = loaders.ModuleLoader(locator=self.locator, module=virtue)
         self.assertEqual(
-            repr(loader), "ModuleLoader(module=PythonModule<'virtue'>)",
+            repr(loader),
+            "ModuleLoader(module=PythonModule<'virtue'>)",
         )

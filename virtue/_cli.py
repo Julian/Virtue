@@ -13,7 +13,6 @@ from virtue.runner import run
 
 
 class _Reporter(click.ParamType):
-
     name = "reporter"
 
     _BUILT_IN = {
@@ -52,11 +51,13 @@ class _Reporter(click.ParamType):
         Can either be a fully qualified object name (e.g.
         mypackage.MyReporter) or one of the builtin reporter names:
         """,
-    ) + ", ".join(_Reporter._BUILT_IN),
+    )
+    + ", ".join(_Reporter._BUILT_IN),
     type=_Reporter(),
 )
 @click.option(
-    "-x", "--stop-after",
+    "-x",
+    "--stop-after",
     default=None,
     count=True,
     help=(

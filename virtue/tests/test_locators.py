@@ -56,7 +56,8 @@ class TestObjectLocator(TestCase):
 
         cases = locator.locate_in(ASampleTestCase)
         self.assertEqual(
-            sorted(cases, key=attrgetter("attribute")), [
+            sorted(cases, key=attrgetter("attribute")),
+            [
                 AttributeLoader(cls=ASampleTestCase, attribute="TEST1"),
                 AttributeLoader(cls=ASampleTestCase, attribute="TEST_2"),
             ],
@@ -80,7 +81,8 @@ class TestObjectLocator(TestCase):
 
         cases = locator.locate_in(ASampleTestCase)
         self.assertEqual(
-            sorted(cases, key=attrgetter("attribute")), [
+            sorted(cases, key=attrgetter("attribute")),
+            [
                 AttributeLoader(cls=ASampleTestCase, attribute="testBar"),
                 AttributeLoader(cls=ASampleTestCase, attribute="test_foo"),
             ],
@@ -97,7 +99,8 @@ class TestObjectLocator(TestCase):
 
         cases = locator.locate_in(ASampleTestCase)
         self.assertEqual(
-            sorted(cases, key=attrgetter("attribute")), [
+            sorted(cases, key=attrgetter("attribute")),
+            [
                 AttributeLoader(cls=ASampleTestCase, attribute="test_bar"),
             ],
         )
@@ -105,6 +108,7 @@ class TestObjectLocator(TestCase):
     def test_it_loads_methods_from_dynamically_created_test_case_classes(self):
         locator = locators.ObjectLocator()
         from virtue.tests.samples.dynamic_test import TestFoo
+
         name = "virtue.tests.samples.dynamic_test.TestFoo.test_F0"
         self.assertEqual(
             list(locator.locate_by_name(name)),
@@ -114,6 +118,7 @@ class TestObjectLocator(TestCase):
     def test_it_loads_methods_from_test_case_classes_with_mixin_methods(self):
         locator = locators.ObjectLocator()
         from virtue.tests.samples.mixin import TestFoo
+
         name = "virtue.tests.samples.mixin.TestFoo.test_baz"
         self.assertEqual(
             list(locator.locate_by_name(name)),
@@ -125,9 +130,11 @@ class TestObjectLocator(TestCase):
             is_test_class=(lambda attr, value: attr != "Foo"),
         )
         from virtue.tests.samples import module_for_TestObjectLocator as module
+
         cases = locator.locate_in(module)
         self.assertEqual(
-            sorted(cases, key=attrgetter("attribute")), [
+            sorted(cases, key=attrgetter("attribute")),
+            [
                 AttributeLoader(cls=module.Baz, attribute="test_bar"),
                 AttributeLoader(cls=module.Baz, attribute="test_baz"),
                 AttributeLoader(cls=module.Bar, attribute="test_foo"),
@@ -137,9 +144,11 @@ class TestObjectLocator(TestCase):
     def test_by_default_it_looks_for_classes_inheriting_TestCase(self):
         locator = locators.ObjectLocator()
         from virtue.tests.samples import module_for_TestObjectLocator as module
+
         cases = locator.locate_in(module)
         self.assertEqual(
-            sorted(cases, key=attrgetter("attribute")), [
+            sorted(cases, key=attrgetter("attribute")),
+            [
                 AttributeLoader(cls=module.Foo, attribute="test_foo"),
             ],
         )
@@ -151,7 +160,8 @@ class TestObjectLocator(TestCase):
         package = self.create_package_with_tests(locator)
         cases = locator.locate_in(package)
         self.assertEqual(
-            sorted(case.module.name for case in cases), [
+            sorted(case.module.name for case in cases),
+            [
                 "virtue.tests.temp",
                 "virtue.tests.temp.bar",
                 "virtue.tests.temp.sub",
@@ -165,7 +175,8 @@ class TestObjectLocator(TestCase):
         package = self.create_package_with_tests(locator)
         cases = locator.locate_in(package)
         self.assertEqual(
-            sorted(case.module.name for case in cases), [
+            sorted(case.module.name for case in cases),
+            [
                 "virtue.tests.temp.sub.test_quux",
                 "virtue.tests.temp.test_baz",
             ],
@@ -190,6 +201,7 @@ class TestObjectLocator(TestCase):
         subpackage.child(b"test_quux.py").setContent(b"")
 
         from virtue.tests import temp as package
+
         return package
 
 

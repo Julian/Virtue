@@ -31,6 +31,7 @@ def prefixed_by(prefix):
 
     def prefixed_by_(name, value=None):
         return name.startswith(prefix)
+
     prefixed_by_.__name__ += prefix
     return prefixed_by_
 

@@ -1,4 +1,3 @@
-# -*- encoding: utf-8 -*-
 from difflib import ndiff
 from io import StringIO
 from textwrap import dedent
@@ -45,7 +44,8 @@ class TestRun(unittest.TestCase):
     def test_it_runs_subtests(self):
         result = runner.run(tests=["virtue.tests.samples.subtests"])
         self.assertEqual(
-            result, Counter(
+            result,
+            Counter(
                 subtest_failures=1,
                 subtest_successes=4,
                 successes=3,
@@ -63,7 +63,8 @@ class TestRun(unittest.TestCase):
             stop_after=1,
         )
         self.assertEqual(
-            result, Counter(failures=1, successes=result.successes),
+            result,
+            Counter(failures=1, successes=result.successes),
         )
 
     def test_it_can_stop_short_combined_with_errors(self):
@@ -101,6 +102,7 @@ class TestRun(unittest.TestCase):
 
     def test_it_runs_tests_by_path_if_you_insist(self):
         import virtue.tests.samples
+
         path = os.path.join(
             os.path.dirname(virtue.tests.samples.__file__),
             "one_unsuccessful_test.py",
@@ -131,8 +133,10 @@ class TestRun(unittest.TestCase):
             reporter=result,
         )
         import virtue.tests.samples.one_successful_test
+
         self.assertEqual(
-            result, Recorder(
+            result,
+            Recorder(
                 successes=v(
                     virtue.tests.samples.one_successful_test.Foo("test_foo"),
                 ),
@@ -159,7 +163,8 @@ class TestRunOutput(unittest.TestCase):
 
         if re.search(globbed, got, re.DOTALL) is None:
             self.fail(
-                "\n    " + "\n    ".join(
+                "\n    "
+                + "\n    ".join(
                     ndiff(got.splitlines(), dedented.splitlines()),
                 ),
             )

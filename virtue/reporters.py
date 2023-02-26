@@ -29,7 +29,6 @@ class _DelayedMessage:
 
 
 class Outputter:
-
     _last_test_class = None
     _last_test_module = None
     _current_subtests_test = None
@@ -55,6 +54,7 @@ class Outputter:
 
         if colored:
             from colorama import Fore, Style
+
             for attribute, color, text in self._COLORS:
                 color = getattr(Fore, color)
                 message = f"{Style.BRIGHT}{color}{text}{Style.RESET_ALL}"
@@ -64,7 +64,8 @@ class Outputter:
                 setattr(self, attribute, text)
 
         self._later = {
-            status: defaultdict(list) for status in [
+            status: defaultdict(list)
+            for status in [
                 self.SKIPPED,
                 self.EXPECTED_FAILURE,
                 self.FAIL,
@@ -273,7 +274,6 @@ class Counter:
 
 @attrs.define(slots=False)
 class Recorder:
-
     errors: PVector = v()
     failures: PVector = v()
     skips: PVector = v()
@@ -372,7 +372,6 @@ class Recorder:
 
 @attrs.define(slots=False)
 class ComponentizedReporter:
-
     outputter: Outputter = attrs.field(factory=Outputter)
     recorder = attrs.field(factory=Recorder, repr=False)
     stream = attrs.field(default=sys.stdout)

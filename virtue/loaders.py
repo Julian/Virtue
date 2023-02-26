@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Type
+from typing import TYPE_CHECKING
 import itertools
 
 from attrs import field, frozen
@@ -22,7 +22,7 @@ class AttributeLoader:
     selected test method).
     """
 
-    cls: Type
+    cls: type
     attribute: str
 
     def load(self):

@@ -49,7 +49,8 @@ class TestMain(TestCase):
         with self.assertRaises(SystemExit) as e:
             _cli.main(
                 [
-                    "--reporter", "summary",
+                    "--reporter",
+                    "summary",
                     "virtue.tests.samples.one_successful_test",
                 ],
             )
@@ -59,7 +60,8 @@ class TestMain(TestCase):
         with self.assertRaises(SystemExit) as e:
             _cli.main(
                 [
-                    "--reporter", "text",
+                    "--reporter",
+                    "text",
                     "virtue.tests.samples.one_unsuccessful_test",
                 ],
             )
@@ -69,7 +71,8 @@ class TestMain(TestCase):
         with self.assertRaises(SystemExit) as e:
             _cli.main(
                 [
-                    "--reporter", "non-existent reporter",
+                    "--reporter",
+                    "non-existent reporter",
                     "virtue.tests.samples.one_unsuccessful_test",
                 ],
             )
