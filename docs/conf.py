@@ -3,7 +3,7 @@ import re
 
 project = "Virtue"
 author = "Julian Berman"
-copyright = "2014, " + author
+copyright = f"2014, {author}"
 
 release = importlib.metadata.version("virtue")
 version = release.partition("-")[0]
@@ -19,21 +19,15 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx.ext.napoleon",
     "sphinx.ext.viewcode",
+    "sphinx_copybutton",
     "sphinxcontrib.spelling",
+    "sphinxext.opengraph",
 ]
 
 pygments_style = "lovelace"
 pygments_dark_style = "one-dark"
 
 html_theme = "furo"
-
-# = Builders =
-
-nitpick_ignore = [
-    # Missing from pyrsistent docs
-    ("py:class", "pyrsistent.typing.PMap"),
-    ("py:class", "pyrsistent.typing.PVector"),
-]
 
 
 def entire_domain(host):

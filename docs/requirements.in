@@ -2,4 +2,6 @@ file:.#egg=virtue
 furo
 pygments-github-lexers
 sphinx
+sphinx-copybutton
 sphinxcontrib-spelling
+sphinxext-opengraph
