@@ -32,6 +32,10 @@ class _DelayedMessage:
 
 
 class Outputter:
+    """
+    An outputter converts test results to renderable strings.
+    """
+
     _last_test_class = None
     _last_test_module = None
     _current_subtests_test = None
@@ -82,9 +86,14 @@ class Outputter:
         self._later[message.status][message.body].append(message)
 
     def run_started(self):
-        pass
+        """
+        Output nothing.
+        """
 
     def run_stopped(self, recorder, runtime):
+        """
+        Output all the messages stored for later, as well as a final summary.
+        """
         for status in self._later.values():
             for messages in status.values():
                 if not messages:
@@ -136,6 +145,9 @@ class Outputter:
         yield "\n"
 
     def test_started(self, test):
+        """
+        Output the test name.
+        """
         cls = test.__class__
         module = cls.__module__
 
@@ -151,63 +163,91 @@ class Outputter:
             yield "\n"
 
     def test_stopped(self, test):
-        pass
+        """
+        Output nothing.
+        """
 
     def test_errored(self, test, exc_info):
+        """
+        Output an error.
+        """
         self._show_later(
             status=self.ERROR,
             body="".join(format_exception(*exc_info)),
             subject=test,
         )
-        return self.format_line(test, self._error)
+        return self._format_line(test, self._error)
 
     def test_failed(self, test, exc_info):
+        """
+        Output a failure.
+        """
         self._show_later(
             status=self.FAIL,
             body="".join(format_exception(*exc_info)),
             subject=test,
         )
-        return self.format_line(test, self._fail)
+        return self._format_line(test, self._fail)
 
     def test_skipped(self, test, reason):
+        """
+        Output a skip.
+        """
         self._show_later(status=self.SKIPPED, body=reason, subject=test)
-        return self.format_line(test, self._skipped)
+        return self._format_line(test, self._skipped)
 
     def test_expectedly_failed(self, test, exc_info):
+        """
+        Output an expected failure.
+        """
         self._show_later(status=self.EXPECTED_FAILURE, subject=test)
-        return self.format_line(test, self._expected_failure)
+        return self._format_line(test, self._expected_failure)
 
     def test_unexpectedly_succeeded(self, test):
+        """
+        Output an unexpected success.
+        """
         self._show_later(status=self.UNEXPECTED_SUCCESS, subject=test)
-        return self.format_line(test, self._unexpected_success)
+        return self._format_line(test, self._unexpected_success)
 
     def test_succeeded(self, test):
-        return self.format_line(test, self._ok)
+        """
+        Output a success.
+        """
+        return self._format_line(test, self._ok)
 
     def subtest_succeeded(self, test, subtest):
-        pass
+        """
+        Output nothing.
+        """
 
     def subtest_failed(self, test, subtest, exc_info):
+        """
+        Output a failed subtest.
+        """
         self._show_later(
             status=self.FAIL,
             body="".join(format_exception(*exc_info)),
             subject=subtest,
         )
-        return self.format_subtest_result(test, subtest, self._fail)
+        return self._format_subtest_result(test, subtest, self._fail)
 
     def subtest_errored(self, test, subtest, exc_info):
+        """
+        Output an errored subtest.
+        """
         self._show_later(
             status=self.ERROR,
             body="".join(format_exception(*exc_info)),
             subject=subtest,
         )
-        return self.format_subtest_result(test, subtest, self._error)
+        return self._format_subtest_result(test, subtest, self._error)
 
-    def format_line(self, test, result):
+    def _format_line(self, test, result):
         before = f"{self.indent}{self.indent}{test._testMethodName} ..."
         return self._pad_center(left=before, right=result) + "\n"
 
-    def format_subtest_result(self, test, subtest, result):
+    def _format_subtest_result(self, test, subtest, result):
         if self._current_subtests_test != test.id():
             before = f"{self.indent}{self.indent}{test._testMethodName}\n"
         else:
@@ -241,32 +281,35 @@ class Counter:
 
     @property
     def count(self):
+        """
+        Return a total count of all tests.
+        """
         return sum(attrs.astuple(self))
 
     testsRun = count
 
-    def startTest(self, test):
+    def startTest(self, test):  # noqa: D102
         pass
 
-    def stopTest(self, test):
+    def stopTest(self, test):  # noqa: D102
         pass
 
-    def addError(self, test, exc_info):
+    def addError(self, test, exc_info):  # noqa: D102
         self.errors += 1
 
-    def addFailure(self, test, exc_info):
+    def addFailure(self, test, exc_info):  # noqa: D102
         self.failures += 1
 
-    def addExpectedFailure(self, *args, **kwargs):
+    def addExpectedFailure(self, *args, **kwargs):  # noqa: D102
         self.expected_failures += 1
 
-    def addUnexpectedSuccess(self, test):
+    def addUnexpectedSuccess(self, test):  # noqa: D102
         self.unexpected_successes += 1
 
-    def addSuccess(self, test):
+    def addSuccess(self, test):  # noqa: D102
         self.successes += 1
 
-    def addSubTest(self, test, subtest, outcome):
+    def addSubTest(self, test, subtest, outcome):  # noqa: D102
         if outcome is None:
             self.subtest_successes += 1
         elif issubclass(outcome[0], test.failureException):
@@ -277,6 +320,10 @@ class Counter:
 
 @attrs.define(slots=False)
 class Recorder:
+    """
+    Record test results for later inspection.
+    """
+
     errors: PVector = v()
     failures: PVector = v()
     skips: PVector = v()
@@ -291,7 +338,7 @@ class Recorder:
     shouldStop = False
 
     @property
-    def testsRun(self):
+    def testsRun(self):  # noqa: D102
         fields = attrs.astuple(
             self,
             filter=lambda f, _: not f.name.startswith("subtest_"),
@@ -302,7 +349,7 @@ class Recorder:
         return sum(len(each) for each in fields) + tests_with_subtests
 
     @property
-    def subtests(self):
+    def subtests(self):  # noqa: D102
         return sum(
             1
             for each in (
@@ -314,39 +361,39 @@ class Recorder:
             for _ in value
         )
 
-    def startTestRun(self):
+    def startTestRun(self):  # noqa: D102
         pass
 
-    def stopTestRun(self):
+    def stopTestRun(self):  # noqa: D102
         pass
 
-    def startTest(self, test):
+    def startTest(self, test):  # noqa: D102
         pass
 
-    def stopTest(self, test):
+    def stopTest(self, test):  # noqa: D102
         pass
 
-    def addError(self, test, exc_info):
+    def addError(self, test, exc_info):  # noqa: D102
         self.errors = self.errors.append((test, exc_info))
 
-    def addFailure(self, test, exc_info):
+    def addFailure(self, test, exc_info):  # noqa: D102
         self.failures = self.failures.append((test, exc_info))
 
-    def addExpectedFailure(self, test, exc_info):
+    def addExpectedFailure(self, test, exc_info):  # noqa: D102
         self.expected_failures = self.expected_failures.append(
             (test, exc_info),
         )
 
-    def addSkip(self, test, reason):
+    def addSkip(self, test, reason):  # noqa: D102
         self.skips = self.skips.append(test)
 
-    def addUnexpectedSuccess(self, test):
+    def addUnexpectedSuccess(self, test):  # noqa: D102
         self.unexpected_successes = self.unexpected_successes.append(test)
 
-    def addSuccess(self, test):
+    def addSuccess(self, test):  # noqa: D102
         self.successes = self.successes.append(test)
 
-    def addSubTest(self, test, subtest, outcome):
+    def addSubTest(self, test, subtest, outcome):  # noqa: D102
         if outcome is None:
             self.subtest_successes = self.subtest_successes.set(
                 test,
@@ -363,7 +410,7 @@ class Recorder:
                 self.subtest_errors.get(test, v()).append(subtest),
             )
 
-    def wasSuccessful(self):
+    def wasSuccessful(self):  # noqa: D102
         return not (
             self.errors
             or self.failures
@@ -375,6 +422,10 @@ class Recorder:
 
 @attrs.define(slots=False)
 class ComponentizedReporter:
+    """
+    Combine together outputting and recording capabilities.
+    """
+
     outputter: Outputter = attrs.field(factory=Outputter)
     recorder = attrs.field(factory=Recorder, repr=False)
     stream = attrs.field(default=sys.stdout)
@@ -384,62 +435,62 @@ class ComponentizedReporter:
     shouldStop = False
 
     @property
-    def testsRun(self):
+    def testsRun(self):  # noqa: D102
         return self.recorder.testsRun
 
-    def startTestRun(self):
+    def startTestRun(self):  # noqa: D102
         self._start_time = self._time()
         self.recorder.startTestRun()
         self.stream.writelines(self.outputter.run_started() or "")
 
-    def stopTestRun(self):
+    def stopTestRun(self):  # noqa: D102
         self.recorder.stopTestRun()
         runtime = self._time() - self._start_time
         self.stream.writelines(
             self.outputter.run_stopped(self.recorder, runtime) or "",
         )
 
-    def startTest(self, test):
+    def startTest(self, test):  # noqa: D102
         self.recorder.startTest(test)
         self.stream.writelines(self.outputter.test_started(test) or "")
 
-    def stopTest(self, test):
+    def stopTest(self, test):  # noqa: D102
         self.recorder.stopTest(test)
         self.stream.writelines(self.outputter.test_stopped(test) or "")
 
-    def addError(self, test, exc_info):
+    def addError(self, test, exc_info):  # noqa: D102
         self.recorder.addError(test, exc_info)
         self.stream.writelines(
             self.outputter.test_errored(test, exc_info) or "",
         )
 
-    def addFailure(self, test, exc_info):
+    def addFailure(self, test, exc_info):  # noqa: D102
         self.recorder.addFailure(test, exc_info)
         self.stream.writelines(
             self.outputter.test_failed(test, exc_info) or "",
         )
 
-    def addSkip(self, test, reason):
+    def addSkip(self, test, reason):  # noqa: D102
         self.recorder.addSkip(test, reason)
         self.stream.writelines(self.outputter.test_skipped(test, reason) or "")
 
-    def addExpectedFailure(self, test, exc_info):
+    def addExpectedFailure(self, test, exc_info):  # noqa: D102
         self.recorder.addExpectedFailure(test, exc_info)
         self.stream.writelines(
             self.outputter.test_expectedly_failed(test, exc_info) or "",
         )
 
-    def addUnexpectedSuccess(self, test):
+    def addUnexpectedSuccess(self, test):  # noqa: D102
         self.recorder.addUnexpectedSuccess(test)
         self.stream.writelines(
             self.outputter.test_unexpectedly_succeeded(test) or "",
         )
 
-    def addSuccess(self, test):
+    def addSuccess(self, test):  # noqa: D102
         self.recorder.addSuccess(test)
         self.stream.writelines(self.outputter.test_succeeded(test) or "")
 
-    def addSubTest(self, test, subtest, outcome):
+    def addSubTest(self, test, subtest, outcome):  # noqa: D102
         self.recorder.addSubTest(test, subtest, outcome)
         if outcome is None:
             output = self.outputter.subtest_succeeded(test, subtest)
@@ -449,5 +500,5 @@ class ComponentizedReporter:
             output = self.outputter.subtest_errored(test, subtest, outcome)
         self.stream.writelines(output or "")
 
-    def wasSuccessful(self):
+    def wasSuccessful(self):  # noqa: D102
         return self.recorder.wasSuccessful()
