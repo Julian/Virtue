@@ -40,7 +40,7 @@ class _Reporter(click.ParamType):
         return Reporter()
 
 
-@click.command(context_settings=dict(help_option_names=["-h", "--help"]))
+@click.command(context_settings=dict(help_option_names=["-h", "--help"]))  # type: ignore[arg-type]  # noqa: E501
 @click.version_option(prog_name="virtue")
 @click.option(
     "--reporter",
