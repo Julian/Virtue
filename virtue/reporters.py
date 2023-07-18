@@ -309,6 +309,9 @@ class Counter:
     def addSuccess(self, test):  # noqa: D102
         self.successes += 1
 
+    def addDuration(self, test, elapsed):  # noqa: D102
+        pass
+
     def addSubTest(self, test, subtest, outcome):  # noqa: D102
         if outcome is None:
             self.subtest_successes += 1
@@ -392,6 +395,9 @@ class Recorder:
 
     def addSuccess(self, test):  # noqa: D102
         self.successes = self.successes.append(test)
+
+    def addDuration(self, test, elapsed):  # noqa: D102
+        pass
 
     def addSubTest(self, test, subtest, outcome):  # noqa: D102
         if outcome is None:
@@ -489,6 +495,9 @@ class ComponentizedReporter:
     def addSuccess(self, test):  # noqa: D102
         self.recorder.addSuccess(test)
         self.stream.writelines(self.outputter.test_succeeded(test) or "")
+
+    def addDuration(self, test, elapsed):  # noqa: D102
+        self.recorder.addDuration(test, elapsed)
 
     def addSubTest(self, test, subtest, outcome):  # noqa: D102
         self.recorder.addSubTest(test, subtest, outcome)
