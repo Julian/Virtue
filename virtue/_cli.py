@@ -8,7 +8,7 @@ except ImportError:
 import click
 import twisted.trial.reporter
 
-from virtue.reporters import ComponentizedReporter
+from virtue.reporters import UnittestAdapter
 from virtue.runner import run
 
 
@@ -18,7 +18,7 @@ class _Reporter(click.ParamType):
 
     _BUILT_IN = {
         "bwverbose": twisted.trial.reporter.VerboseTextReporter,
-        "default": ComponentizedReporter,
+        "default": UnittestAdapter,
         "subunit": twisted.trial.reporter.SubunitReporter,
         "summary": twisted.trial.reporter.MinimalReporter,
         "text": twisted.trial.reporter.TextReporter,
@@ -75,4 +75,4 @@ def main(context, **kwargs):
     """
 
     result = run(**kwargs)
-    context.exit(not result.testsRun or not result.wasSuccessful())
+    context.exit(not (result.total and result.succeeded))

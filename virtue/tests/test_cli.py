@@ -47,22 +47,12 @@ class TestMain(TestCase):
     # TODO: these write to stdout
     def test_it_exits_successfully_for_successful_runs(self):
         with self.assertRaises(SystemExit) as e:
-            _cli.main(
-                [
-                    "--reporter", "summary",
-                    "virtue.tests.samples.one_successful_test",
-                ],
-            )
+            _cli.main(["virtue.tests.samples.one_successful_test"])
         self.assertEqual(e.exception.code, os.EX_OK)
 
     def test_it_exits_unsuccessfully_for_unsuccessful_runs(self):
         with self.assertRaises(SystemExit) as e:
-            _cli.main(
-                [
-                    "--reporter", "text",
-                    "virtue.tests.samples.one_unsuccessful_test",
-                ],
-            )
+            _cli.main(["virtue.tests.samples.one_unsuccessful_test"])
         self.assertNotEqual(e.exception.code, os.EX_OK)
 
     def test_it_exits_unsuccessfully_for_unknown_reporters(self):

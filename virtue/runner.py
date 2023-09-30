@@ -1,10 +1,11 @@
+from io import StringIO
 import unittest
 import warnings
 
 import attr
 
 from virtue.locators import ObjectLocator
-from virtue.reporters import Counter
+from virtue.reporters import UnittestAdapter, Recorder
 
 
 def run(tests=(), reporter=None, stop_after=None):
@@ -29,7 +30,7 @@ def run(tests=(), reporter=None, stop_after=None):
     """
 
     if reporter is None:
-        reporter = Counter()
+        reporter = UnittestAdapter(recorder=Recorder(), stream=StringIO())
     if stop_after is not None:
         reporter = _StopAfterWrapper(reporter=reporter, limit=stop_after)
 
@@ -46,14 +47,13 @@ def run(tests=(), reporter=None, stop_after=None):
         warnings.simplefilter("error")
         suite.run(reporter)
     getattr(reporter, "stopTestRun", lambda: None)()
-    return reporter
+    return reporter.recorder.counts()
 
 
 @attr.s(eq=False)
 class _StopAfterWrapper:
     """
     Wrap a reporter to stop after a specified number of non-successes.
-
     """
 
     _limit = attr.ib()

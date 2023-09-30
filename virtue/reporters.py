@@ -79,7 +79,7 @@ class Outputter:
     def run_started(self):
         pass
 
-    def run_stopped(self, recorder, runtime):
+    def run_stopped(self, counter, recorder):
         for status in self._later.values():
             for messages in status.values():
                 if not messages:
@@ -92,14 +92,18 @@ class Outputter:
 
         yield "\n"
         yield "-" * self.line_width
-        tests = "tests" if recorder.testsRun != 1 else "test"
-        yield f"\nRan {recorder.testsRun} {tests} in {runtime:.3f}s\n\n"
-        if recorder.wasSuccessful():
+
+        # XXX
+        total = counter.total
+
+        tests = "tests" if total != 1 else "test"
+        yield f"\nRan {total} {tests}{recorder.summary_extra}\n\n"
+        if counter.succeeded:
             yield self._passed
         else:
             yield self._failed
 
-        if recorder.testsRun:
+        if total:
             yield " ("
             summary = []
             for attribute in (
@@ -110,7 +114,7 @@ class Outputter:
                 "expected_failures",
                 "unexpected_successes",
             ):
-                subcount = len(getattr(recorder, attribute))
+                subcount = getattr(counter, attribute)
                 if subcount:
                     summary.append(f"{attribute}={subcount}")
             yield ", ".join(summary)
@@ -184,37 +188,47 @@ class Counter:
 
     errors = attr.ib(default=0)
     failures = attr.ib(default=0)
+    skips = attr.ib(default=0)
     expected_failures = attr.ib(default=0)
     unexpected_successes = attr.ib(default=0)
     successes = attr.ib(default=0)
 
-    shouldStop = False
-
     @property
-    def count(self):
+    def total(self):
         return sum(attr.astuple(self))
 
-    testsRun = count
+    @property
+    def succeeded(self):
+        return not (self.errors or self.failures or self.unexpected_successes)
 
-    def startTest(self, test):
+    def run_started(self):
         pass
 
-    def stopTest(self, test):
+    def run_stopped(self):
         pass
 
-    def addError(self, test, exc_info):
+    def test_started(self, test):
+        pass
+
+    def test_stopped(self, test):
+        pass
+
+    def test_errored(self, test, exc_info):
         self.errors += 1
 
-    def addFailure(self, test, exc_info):
+    def test_failed(self, test, exc_info):
         self.failures += 1
 
-    def addExpectedFailure(self, *args, **kwargs):
+    def test_skipped(self, test, reason):
+        self.skips += 1
+
+    def test_expectedly_failed(self, *args, **kwargs):
         self.expected_failures += 1
 
-    def addUnexpectedSuccess(self, test):
+    def test_unexpectedly_succeeded(self, test):
         self.unexpected_successes += 1
 
-    def addSuccess(self, test):
+    def test_succeeded(self, test):
         self.successes += 1
 
 
@@ -228,116 +242,172 @@ class Recorder:
     expected_failures = attr.ib(default=v())
     unexpected_successes = attr.ib(default=v())
 
-    shouldStop = False
+    summary_extra = ""
 
-    @property
-    def testsRun(self):
-        return sum(len(tests) for tests in attr.astuple(self))
+    def counts(self):
+        return Counter(
+            errors=len(self.errors),
+            failures=len(self.failures),
+            skips=len(self.skips),
+            expected_failures=len(self.expected_failures),
+            unexpected_successes=len(self.unexpected_successes),
+            successes=len(self.successes),
+        )
 
-    def startTestRun(self):
+    def run_started(self):
         pass
 
-    def stopTestRun(self):
+    def run_stopped(self):
         pass
 
-    def startTest(self, test):
+    def test_started(self, test):
         pass
 
-    def stopTest(self, test):
+    def test_stopped(self, test):
         pass
 
-    def addError(self, test, exc_info):
+    def test_errored(self, test, exc_info):
         self.errors = self.errors.append((test, exc_info))
 
-    def addFailure(self, test, exc_info):
+    def test_failed(self, test, exc_info):
         self.failures = self.failures.append((test, exc_info))
 
-    def addExpectedFailure(self, test, exc_info):
+    def test_expectedly_failed(self, test, exc_info):
         self.expected_failures = self.expected_failures.append(
             (test, exc_info),
         )
 
-    def addSkip(self, test, reason):
+    def test_skipped(self, test, reason):
         self.skips = self.skips.append(test)
 
-    def addSuccess(self, test):
+    def test_succeeded(self, test):
         self.successes = self.successes.append(test)
 
-    def addUnexpectedSuccess(self, test):
+    def test_unexpectedly_succeeded(self, test):
         self.unexpected_successes = self.unexpected_successes.append(test)
-
-    def wasSuccessful(self):
-        return not (self.errors or self.failures or self.unexpected_successes)
 
 
 @attr.s
-class ComponentizedReporter:
+class Timer:
+    """
+    A timer is a recorder that records test runtime for tests that run.
+    """
 
+    _time = attr.ib(default=time.monotonic_ns, repr=False)
+    _times = attr.ib(factory=list)
+    _running = attr.ib(factory=dict)
+
+    summary_extra = ""
+
+    def run_started(self):
+        self._start_time = self._time()
+
+    def run_stopped(self, counter):
+        took = self._time() - self._start_time
+        equal = took / (counter.total or 1)
+        for test, duration in self._times:
+            if duration > 5 * equal:
+                print(test, duration * 1e-6, "ms")
+        self.summary_extra = f" in {took * 1e-9:.3f}s"
+
+    def test_started(self, test):
+        self._running[test] = self._time()
+
+    def test_stopped(self, test):
+        took = self._time() - self._running.pop(test)
+        self._times.append((_test_name(test), took))
+
+    def test_errored(self, test, exc_info):
+        pass
+
+    def test_failed(self, test, exc_info):
+        pass
+
+    def test_expectedly_failed(self, test, exc_info):
+        pass
+
+    def test_skipped(self, test, reason):
+        pass
+
+    def test_succeeded(self, test):
+        pass
+
+    def test_unexpectedly_succeeded(self, test):
+        pass
+
+
+@attr.s
+class UnittestAdapter:
+
+    _counter = attr.ib(factory=Counter)
     outputter = attr.ib(factory=Outputter)
-    recorder = attr.ib(factory=Recorder, repr=False)
+    recorder = attr.ib(factory=Timer, repr=False)
     stream = attr.ib(default=sys.stdout)
-    _time = attr.ib(default=time.time, repr=False)
 
     shouldStop = False
 
     @property
     def testsRun(self):
-        return self.recorder.testsRun
+        return self._counter.total
 
     def startTestRun(self):
-        self._start_time = self._time()
-        self.recorder.startTestRun()
+        self.recorder.run_started()
+        self._counter.run_started()
         self.stream.writelines(self.outputter.run_started() or "")
 
     def stopTestRun(self):
-        self.recorder.stopTestRun()
-        runtime = self._time() - self._start_time
+        self.recorder.run_stopped(counter=self._counter)
+        self._counter.run_stopped()
         self.stream.writelines(
-            self.outputter.run_stopped(self.recorder, runtime) or "",
+            self.outputter.run_stopped(
+                counter=self._counter,
+                recorder=self.recorder
+            ) or "",
         )
 
     def startTest(self, test):
-        self.recorder.startTest(test)
+        self.recorder.test_started(test)
+        self._counter.test_started(test)
         self.stream.writelines(self.outputter.test_started(test) or "")
 
     def stopTest(self, test):
-        self.recorder.stopTest(test)
+        self.recorder.test_stopped(test)
         self.stream.writelines(self.outputter.test_stopped(test) or "")
 
     def addError(self, test, exc_info):
-        self.recorder.addError(test, exc_info)
+        self.recorder.test_errored(test, exc_info)
         self.stream.writelines(
             self.outputter.test_errored(test, exc_info) or "",
         )
 
     def addFailure(self, test, exc_info):
-        self.recorder.addFailure(test, exc_info)
+        self.recorder.test_failed(test, exc_info)
         self.stream.writelines(
             self.outputter.test_failed(test, exc_info) or "",
         )
 
     def addSkip(self, test, reason):
-        self.recorder.addSkip(test, reason)
+        self.recorder.test_skipped(test, reason)
         self.stream.writelines(self.outputter.test_skipped(test, reason) or "")
 
     def addExpectedFailure(self, test, exc_info):
-        self.recorder.addExpectedFailure(test, exc_info)
+        self.recorder.test_expectedly_failed(test, exc_info)
         self.stream.writelines(
             self.outputter.test_expectedly_failed(test, exc_info) or "",
         )
 
     def addUnexpectedSuccess(self, test):
-        self.recorder.addUnexpectedSuccess(test)
+        self.recorder.test_unexpectedly_succeeded(test)
         self.stream.writelines(
             self.outputter.test_unexpectedly_succeeded(test) or "",
         )
 
     def addSuccess(self, test):
-        self.recorder.addSuccess(test)
+        self.recorder.test_succeeded(test)
         self.stream.writelines(self.outputter.test_succeeded(test) or "")
 
     def wasSuccessful(self):
-        return self.recorder.wasSuccessful()
+        return self._counter.succeeded
 
 
 def _test_name(test):

@@ -6,15 +6,8 @@ import os
 import re
 import unittest
 
-from pyrsistent import v
-
 from virtue import runner
-from virtue.reporters import (
-    ComponentizedReporter,
-    Counter,
-    Outputter,
-    Recorder,
-)
+from virtue.reporters import Counter, Outputter, Timer, UnittestAdapter
 
 
 class TestRun(unittest.TestCase):
@@ -105,36 +98,13 @@ class TestRun(unittest.TestCase):
         with self.assertRaises(FileNotFoundError):
             runner.run(tests=[path])
 
-    def test_unittest_TestResult(self):
-        result = unittest.TestResult()
-        runner.run(
-            tests=["virtue.tests.samples.one_successful_test"],
-            reporter=result,
-        )
-        self.assertEqual(result.testsRun, 1)
-
-    def test_Recorder(self):
-        result = Recorder()
-        runner.run(
-            tests=["virtue.tests.samples.one_successful_test"],
-            reporter=result,
-        )
-        import virtue.tests.samples.one_successful_test
-        self.assertEqual(
-            result, Recorder(
-                successes=v(
-                    virtue.tests.samples.one_successful_test.Foo("test_foo"),
-                ),
-            ),
-        )
-
 
 class TestRunOutput(unittest.TestCase):
     def assertOutputIs(self, expected, **kwargs):
-        reporter = ComponentizedReporter(
+        reporter = UnittestAdapter(
             outputter=Outputter(colored=False, line_width=40),
             stream=StringIO(),
-            time=lambda: 0,
+            recorder=Timer(time=lambda: 0),
         )
         runner.run(reporter=reporter, **kwargs)
         got = reporter.stream.getvalue()
