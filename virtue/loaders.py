@@ -4,21 +4,14 @@ import attr
 
 
 @attr.s
-class AttributeLoader:
-    """
-    I load a test case by instantiating a class with a given attribute name.
+class GroupLoader:
 
-    This is the typical way that `unittest.TestCase` methods are loaded:
-    by calling ``TestCase("test_something")`` (and then by calling
-    :meth:`~unittest.TestCase.run` on the resulting instance to run the
-    selected test method).
-    """
-
-    cls = attr.ib()
-    attribute = attr.ib()
+    _cases = attr.ib()
+    _args = attr.ib(default=())
+    _kwargs = attr.ib(default={})
 
     def load(self):
-        return [self.cls(self.attribute)]
+        return self._cases(*self._args, **self._kwargs)
 
 
 @attr.s

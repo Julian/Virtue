@@ -6,7 +6,7 @@ from twisted.python.filepath import FilePath
 from twisted.python.reflect import fullyQualifiedName
 
 from virtue import locators
-from virtue.loaders import AttributeLoader
+from virtue.loaders import GroupLoader
 
 
 class TestObjectLocator(TestCase):
@@ -25,7 +25,7 @@ class TestObjectLocator(TestCase):
         )
         self.assertEqual(
             list(locator.locate_by_name(this_fully_qualified_name)),
-            [AttributeLoader(cls=self.__class__, attribute=this_name)],
+            [GroupLoader(cls=self.__class__, attribute=this_name)],
         )
 
     def test_it_can_locate_aliased_methods_directly_by_name(self):
@@ -36,7 +36,7 @@ class TestObjectLocator(TestCase):
         )
         self.assertEqual(
             list(locator.locate_by_name(aliased_fully_qualified_name)),
-            [AttributeLoader(cls=self.__class__, attribute=this_name)],
+            [GroupLoader(cls=self.__class__, attribute=this_name)],
         )
 
     def test_it_finds_methods_on_test_cases(self):
@@ -57,8 +57,8 @@ class TestObjectLocator(TestCase):
         cases = locator.locate_in(ASampleTestCase)
         self.assertEqual(
             sorted(cases, key=attrgetter("attribute")), [
-                AttributeLoader(cls=ASampleTestCase, attribute="TEST1"),
-                AttributeLoader(cls=ASampleTestCase, attribute="TEST_2"),
+                GroupLoader(cls=ASampleTestCase, attribute="TEST1"),
+                GroupLoader(cls=ASampleTestCase, attribute="TEST_2"),
             ],
         )
 
@@ -81,8 +81,8 @@ class TestObjectLocator(TestCase):
         cases = locator.locate_in(ASampleTestCase)
         self.assertEqual(
             sorted(cases, key=attrgetter("attribute")), [
-                AttributeLoader(cls=ASampleTestCase, attribute="testBar"),
-                AttributeLoader(cls=ASampleTestCase, attribute="test_foo"),
+                GroupLoader(cls=ASampleTestCase, attribute="testBar"),
+                GroupLoader(cls=ASampleTestCase, attribute="test_foo"),
             ],
         )
 
@@ -98,7 +98,7 @@ class TestObjectLocator(TestCase):
         cases = locator.locate_in(ASampleTestCase)
         self.assertEqual(
             sorted(cases, key=attrgetter("attribute")), [
-                AttributeLoader(cls=ASampleTestCase, attribute="test_bar"),
+                GroupLoader(cls=ASampleTestCase, attribute="test_bar"),
             ],
         )
 
@@ -108,7 +108,7 @@ class TestObjectLocator(TestCase):
         name = "virtue.tests.samples.dynamic_test.TestFoo.test_F0"
         self.assertEqual(
             list(locator.locate_by_name(name)),
-            [AttributeLoader(cls=TestFoo, attribute="test_F0")],
+            [GroupLoader(cls=TestFoo, attribute="test_F0")],
         )
 
     def test_it_finds_test_case_classes_on_modules(self):
@@ -119,9 +119,9 @@ class TestObjectLocator(TestCase):
         cases = locator.locate_in(module)
         self.assertEqual(
             sorted(cases, key=attrgetter("attribute")), [
-                AttributeLoader(cls=module.Baz, attribute="test_bar"),
-                AttributeLoader(cls=module.Baz, attribute="test_baz"),
-                AttributeLoader(cls=module.Bar, attribute="test_foo"),
+                GroupLoader(cls=module.Baz, attribute="test_bar"),
+                GroupLoader(cls=module.Baz, attribute="test_baz"),
+                GroupLoader(cls=module.Bar, attribute="test_foo"),
             ],
         )
 
@@ -130,8 +130,8 @@ class TestObjectLocator(TestCase):
         from virtue.tests.samples import module_for_TestObjectLocator as module
         cases = locator.locate_in(module)
         self.assertEqual(
-            sorted(cases, key=attrgetter("attribute")), [
-                AttributeLoader(cls=module.Foo, attribute="test_foo"),
+            sorted(cases), [
+                GroupLoader.for_TestCase(TestCase=module.Foo, name="test_foo"),
             ],
         )
 

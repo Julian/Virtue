@@ -5,38 +5,6 @@ from twisted.python.modules import getModule as get_module
 from virtue import loaders, locators
 
 
-class TestAttributeLoader(TestCase):
-    def test_it_loads_attributes(self):
-        cls, attr = self.__class__, "test_it_loads_attributes"
-        loader = loaders.AttributeLoader(cls=cls, attribute=attr)
-        self.assertEqual(list(loader.load()), [cls(attr)])
-
-    def test_eq_neq(self):
-        cls = self.__class__
-        loader = loaders.AttributeLoader(cls=cls, attribute="test_eq")
-        self.assertTrue(
-            loader == loaders.AttributeLoader(cls=cls, attribute="test_eq"),
-        )
-        self.assertFalse(
-            loader != loaders.AttributeLoader(cls=cls, attribute="test_eq"),
-        )
-        self.assertFalse(
-            loader == loaders.AttributeLoader(cls=cls, attribute="test_neq"),
-        )
-        self.assertTrue(
-            loader != loaders.AttributeLoader(cls=cls, attribute="test_neq"),
-        )
-
-    def test_repr(self):
-        loader = loaders.AttributeLoader(
-            cls=self.__class__, attribute="test_repr",
-        )
-        self.assertEqual(
-            repr(loader),
-            "AttributeLoader(cls=<class 'virtue.tests.test_loaders.TestAttributeLoader'>, attribute='test_repr')",  # noqa: E501
-        )
-
-
 class TestModuleLoader(TestCase):
 
     locator = locators.ObjectLocator()

@@ -8,7 +8,7 @@ from twisted.python.reflect import namedAny as named_any
 from twisted.trial.runner import filenameToModule as filename_to_module
 import attr
 
-from virtue.loaders import AttributeLoader, ModuleLoader
+from virtue.loaders import GroupLoader, ModuleLoader
 
 
 def prefixed_by(prefix):
@@ -108,10 +108,10 @@ class ObjectLocator:
                 class_name, _, method_name = name.rpartition(".")
                 cls = named_any(class_name)
                 if inspect.isclass(cls):
-                    return [AttributeLoader(cls=cls, attribute=method_name)]
+                    return [GroupLoader(cases=cls, args=(method_name,))]
             else:
                 if inspect.isclass(cls):
-                    return [AttributeLoader(cls=cls, attribute=method_name)]
+                    return [GroupLoader(cases=cls, args=(method_name,))]
             raise
 
     def locate_in(self, obj):
@@ -157,6 +157,6 @@ class ObjectLocator:
         Locate the methods on the given class that are test cases.
         """
 
-        for attribute, value in inspect.getmembers(cls):
-            if self.is_test_method(attribute, value):
-                yield AttributeLoader(cls=cls, attribute=attribute)
+        for name, value in inspect.getmembers(cls):
+            if self.is_test_method(name, value):
+                yield GroupLoader(cases=cls, args=(name,))
