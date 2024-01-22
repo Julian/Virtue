@@ -31,9 +31,7 @@ class TestObjectLocator(TestCase):
     def test_it_can_locate_aliased_methods_directly_by_name(self):
         locator = locators.ObjectLocator()
         this_name = "test_it_can_locate_aliased_methods_directly_by_name"
-        aliased_fully_qualified_name = ".".join(
-            [self.__class__.__module__, "aliased"],
-        )
+        aliased_fully_qualified_name = f"{self.__class__.__module__}.aliased"
         self.assertEqual(
             list(locator.locate_by_name(aliased_fully_qualified_name)),
             [AttributeLoader(cls=self.__class__, attribute=this_name)],

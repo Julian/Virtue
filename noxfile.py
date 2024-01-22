@@ -9,36 +9,47 @@ PYPROJECT = ROOT / "pyproject.toml"
 DOCS = ROOT / "docs"
 PACKAGE = ROOT / "virtue"
 
+REQUIREMENTS = dict(
+    docs=DOCS / "requirements.txt",
+)
+REQUIREMENTS_IN = [  # this is actually ordered, as files depend on each other
+    path.parent / f"{path.stem}.in" for path in REQUIREMENTS.values()
+]
+
+SUPPORTED = ["3.8", "3.9", "3.10", "pypy3.10", "3.11", "3.12"]
+LATEST = SUPPORTED[-1]
 
 nox.options.sessions = []
 
 
-def session(default=True, **kwargs):
+def session(default=True, python=LATEST, **kwargs):  # noqa: D103
     def _session(fn):
         if default:
             nox.options.sessions.append(kwargs.get("name", fn.__name__))
-        return nox.session(**kwargs)(fn)
+        return nox.session(python=python, **kwargs)(fn)
 
     return _session
 
 
-@session(python=["3.8", "3.9", "3.10", "3.11", "3.12", "pypy3"])
+@session(python=SUPPORTED)
 def tests(session):
+    """
+    Run the test suite with a corresponding Python version.
+    """
     session.install(ROOT)
     if session.posargs and session.posargs[0] == "coverage":
         if len(session.posargs) > 1 and session.posargs[1] == "github":
             posargs = session.posargs[2:]
-            github = os.environ["GITHUB_STEP_SUMMARY"]
+            github = Path(os.environ["GITHUB_STEP_SUMMARY"])
         else:
             posargs, github = session.posargs[1:], None
 
         session.install("coverage[toml]")
         session.run("coverage", "run", *posargs, "-m", "virtue", PACKAGE)
-
         if github is None:
             session.run("coverage", "report")
         else:
-            with open(github, "a") as summary:
+            with github.open("a") as summary:
                 summary.write("### Coverage\n\n")
                 summary.flush()  # without a flush, output seems out of order.
                 session.run(
@@ -51,34 +62,40 @@ def tests(session):
         session.run("virtue", *session.posargs, "virtue")
 
 
-@session(python=["3.8", "3.9", "3.10", "3.11", "3.12", "pypy3"])
+@session()
 def audit(session):
+    """
+    Audit dependencies for vulnerabilities.
+    """
     session.install("pip-audit", ROOT)
     session.run("python", "-m", "pip_audit")
 
 
 @session(tags=["build"])
 def build(session):
+    """
+    Build a distribution suitable for PyPI and check its validity.
+    """
     session.install("build", "twine")
     with TemporaryDirectory() as tmpdir:
         session.run("python", "-m", "build", ROOT, "--outdir", tmpdir)
         session.run("twine", "check", "--strict", tmpdir + "/*")
 
 
-@session()
-def secrets(session):
-    session.install("detect-secrets")
-    session.run("detect-secrets", "scan", ROOT)
-
-
 @session(tags=["style"])
 def style(session):
+    """
+    Check Python code style.
+    """
     session.install("ruff")
     session.run("ruff", "check", ROOT)
 
 
 @session()
 def typing(session):
+    """
+    Check static typing.
+    """
     session.install("mypy", "types-colorama", ROOT)
     session.run("mypy", "--config", PYPROJECT, PACKAGE)
 
@@ -98,7 +115,10 @@ def typing(session):
     ],
 )
 def docs(session, builder):
-    session.install("-r", DOCS / "requirements.txt")
+    """
+    Build the documentation using a specific Sphinx builder.
+    """
+    session.install("-r", REQUIREMENTS["docs"])
     with TemporaryDirectory() as tmpdir_str:
         tmpdir = Path(tmpdir_str)
         argv = ["-n", "-T", "-W"]
@@ -119,6 +139,9 @@ def docs(session, builder):
 
 @session(tags=["docs", "style"], name="docs(style)")
 def docs_style(session):
+    """
+    Check the documentation style.
+    """
     session.install(
         "doc8",
         "pygments",
@@ -128,19 +151,19 @@ def docs_style(session):
 
 
 @session(default=False)
-def bandit(session):
-    session.install("bandit")
-    session.run("bandit", "--recursive", PACKAGE)
-
-
-@session(default=False)
 def requirements(session):
+    """
+    Update the project's pinned requirements.
+
+    You should commit the result afterwards.
+    """
     session.install("pip-tools")
-    for each in [DOCS / "requirements.in"]:
+    for each in REQUIREMENTS_IN:
         session.run(
             "pip-compile",
             "--resolver",
             "backtracking",
+            "--strip-extras",
             "-U",
             each.relative_to(ROOT),
         )

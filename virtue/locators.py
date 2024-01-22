@@ -7,7 +7,9 @@ import inspect
 try:
     from pkgutil import resolve_name
 except ImportError:
-    from pkgutil_resolve_name import resolve_name  # type: ignore
+    from pkgutil_resolve_name import (  # type: ignore[import-not-found, no-redef]
+        resolve_name,
+    )
 
 from attrs import define, field
 from twisted.python.modules import getModule as get_module
@@ -109,7 +111,7 @@ class ObjectLocator:
             try:
                 obj = filename_to_module(name)
             except ValueError as error:
-                raise FileNotFoundError(error)
+                raise FileNotFoundError(error) from error
 
         try:
             return self.locate_in(obj)

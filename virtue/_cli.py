@@ -3,7 +3,9 @@ from textwrap import dedent
 try:
     from pkgutil import resolve_name
 except ImportError:
-    from pkgutil_resolve_name import resolve_name  # type: ignore
+    from pkgutil_resolve_name import (  # type: ignore[import-not-found, no-redef]
+        resolve_name,
+    )
 
 import click
 import twisted.trial.reporter
@@ -34,13 +36,14 @@ class _Reporter(click.ParamType):
         if Reporter is None:
             try:
                 Reporter = resolve_name(value)
-            except (ValueError, ImportError, AttributeError):
-                raise click.BadParameter(f"{value!r} is not a known reporter")
+            except (ValueError, ImportError, AttributeError) as err:
+                exc = click.BadParameter(f"{value!r} is not a known reporter")
+                raise exc from err
 
         return Reporter()
 
 
-@click.command(context_settings=dict(help_option_names=["-h", "--help"]))  # type: ignore[arg-type]  # noqa: E501
+@click.command(context_settings=dict(help_option_names=["-h", "--help"]))  # type: ignore[arg-type]
 @click.version_option(prog_name="virtue")
 @click.option(
     "--reporter",
