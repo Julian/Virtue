@@ -30,6 +30,7 @@ def run(tests=(), reporter=None, stop_after=None):
         stop_after (int):
 
             a number of non-successful tests to allow before stopping the run.
+
     """
     if reporter is None:
         reporter = Counter()
