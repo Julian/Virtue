@@ -92,6 +92,6 @@ typing-extensions==4.11.0
     # via twisted
 urllib3==2.2.1
     # via requests
-virtue @ file:.#egg=virtue
+file:.#egg=virtue
 zope-interface==6.3
     # via twisted
