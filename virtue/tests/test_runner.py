@@ -155,8 +155,7 @@ class TestRunOutput(unittest.TestCase):
         got = reporter.stream.getvalue()
 
         dedented = dedent(expected)
-        if dedented.startswith("\n"):
-            dedented = dedented[1:]
+        dedented = dedented.removeprefix("\n")
 
         # I'm so sorry.
         globbed = re.escape(dedented).replace(re.escape("•"), ".*")
