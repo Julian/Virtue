@@ -61,7 +61,7 @@ class Outputter:
         self.line_width = line_width
 
         if colored:
-            from colorama import Fore, Style
+            from colorama import Fore, Style  # noqa: PLC0415
 
             for attribute, color, text in self._COLORS:
                 color = getattr(Fore, color)
