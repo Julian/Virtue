@@ -63,15 +63,6 @@ def tests(session):
         session.run("virtue", *session.posargs, "virtue")
 
 
-@session()
-def audit(session):
-    """
-    Audit dependencies for vulnerabilities.
-    """
-    session.install("pip-audit", ROOT)
-    session.run("python", "-m", "pip_audit")
-
-
 @session(tags=["build"])
 def build(session):
     """
