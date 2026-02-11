@@ -89,11 +89,11 @@ class ObjectLocator:
     def __attrs_post_init__(self):
         is_cls, self.is_test_class = (
             self.is_test_class,
-            lambda attr, cls: (inspect.isclass(cls) and is_cls(attr, cls)),
+            lambda attr, cls: inspect.isclass(cls) and is_cls(attr, cls),
         )
         is_meth, self.is_test_method = (
             self.is_test_method,
-            lambda attr, val: (callable(val) and is_meth(attr, val)),
+            lambda attr, val: callable(val) and is_meth(attr, val),
         )
 
     def locate_by_name(self, name):
