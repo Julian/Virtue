@@ -5,13 +5,12 @@ Loaders take a named test case and load the test appropriately.
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
+import importlib
 import itertools
 
 from attrs import field, frozen
 
 if TYPE_CHECKING:
-    import twisted.python.modules
-
     from virtue.locators import ObjectLocator
 
 
@@ -43,13 +42,14 @@ class ModuleLoader:
     """
 
     locator: ObjectLocator = field(repr=False)
-    module: twisted.python.modules.PythonModule
+    name: str
 
     def load(self):
         """
         Load all test cases in the module.
         """
-        class_loaders = self.locator.locate_in_module(self.module.load())
+        module = importlib.import_module(self.name)
+        class_loaders = self.locator.locate_in_module(module)
         return itertools.chain.from_iterable(
             class_loader.load() for class_loader in class_loaders
         )

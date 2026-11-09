@@ -1,16 +1,14 @@
+from pkgutil import resolve_name
 from textwrap import dedent
 
-try:
-    from pkgutil import resolve_name
-except ImportError:
-    from pkgutil_resolve_name import (  # type: ignore[import-not-found, no-redef]
-        resolve_name,
-    )
-
 import click
-import twisted.trial.reporter
 
-from virtue.reporters import ComponentizedReporter
+from virtue.reporters import (
+    ComponentizedReporter,
+    Counter,
+    JSONOutputter,
+    TreeOutputter,
+)
 from virtue.runner import run
 
 
@@ -18,14 +16,11 @@ class _Reporter(click.ParamType):
     name = "reporter"
 
     _BUILT_IN = {
-        "bwverbose": twisted.trial.reporter.VerboseTextReporter,
         "default": ComponentizedReporter,
-        "subunit": twisted.trial.reporter.SubunitReporter,
-        "summary": twisted.trial.reporter.MinimalReporter,
-        "text": twisted.trial.reporter.TextReporter,
-        "timing": twisted.trial.reporter.TimingTextReporter,
-        "tree": twisted.trial.reporter.TreeReporter,
-        "verbose": twisted.trial.reporter.VerboseTextReporter,
+        "dots": ComponentizedReporter,
+        "json": lambda: ComponentizedReporter(outputter=JSONOutputter()),
+        "quiet": Counter,
+        "tree": lambda: ComponentizedReporter(outputter=TreeOutputter()),
     }
 
     def convert(self, value, param, ctx):

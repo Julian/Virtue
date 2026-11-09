@@ -58,7 +58,6 @@ autosectionlabel_prefix_document = True
 intersphinx_mapping = dict(
     pyrsistent=("https://pyrsistent.readthedocs.io/en/latest/", None),
     python=("https://docs.python.org/3", None),
-    twisted=("https://docs.twistedmatrix.com/en/stable/api/", None),
 )
 
 # -- sphinxcontrib-spelling --

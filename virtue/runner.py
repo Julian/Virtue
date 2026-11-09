@@ -21,7 +21,7 @@ def run(tests=(), reporter=None, stop_after=None):
 
             the collection of tests (specified as `str` s) to run
 
-        reporter (twisted.trial.itrial.IReporter):
+        reporter (unittest.TestResult):
 
             a reporter to use for the run. If unprovided, the default is
             to return a `virtue.reporters.Counter` (which produces no

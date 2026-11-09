@@ -1,6 +1,7 @@
 from difflib import ndiff
 from io import StringIO
 from textwrap import dedent
+import json
 import os
 import re
 import unittest
@@ -11,8 +12,10 @@ from virtue import runner
 from virtue.reporters import (
     ComponentizedReporter,
     Counter,
+    JSONOutputter,
     Outputter,
     Recorder,
+    TreeOutputter,
 )
 
 
@@ -145,9 +148,11 @@ class TestRun(unittest.TestCase):
 
 
 class TestRunOutput(unittest.TestCase):
+    outputter_cls = Outputter
+
     def assertOutputIs(self, expected, **kwargs):
         reporter = ComponentizedReporter(
-            outputter=Outputter(colored=False, line_width=40),
+            outputter=self.outputter_cls(colored=False, line_width=40),
             stream=StringIO(),
             time=lambda: 0,
         )
@@ -167,6 +172,179 @@ class TestRunOutput(unittest.TestCase):
                     ndiff(got.splitlines(), dedented.splitlines()),
                 ),
             )
+
+    def test_unsuccessful_run(self):
+        self.assertOutputIs(
+            tests=[
+                "virtue.tests.samples.one_successful_test",
+                "virtue.tests.samples.two_unsuccessful_tests",
+            ],
+            expected="""
+            ..FF.
+
+            ========================================
+            [FAIL]
+            Traceback (most recent call last):•
+              File "•unittest/case.py•", line •, in •
+                •
+              File "•virtue/tests/samples/two_unsuccessful_tests.py•", line 14, in test_foo
+                self.fail("I fail too.")
+              •
+            AssertionError: I fail too.
+
+            virtue.tests.samples.two_unsuccessful_tests.Bar.test_foo
+            ========================================
+            [FAIL]
+            Traceback (most recent call last):•
+              File "•unittest/case.py•", line •, in •
+                •
+              File "•virtue/tests/samples/two_unsuccessful_tests.py•", line 9, in test_bar
+                self.fail("I fail.")
+              •
+            AssertionError: I fail.
+
+            virtue.tests.samples.two_unsuccessful_tests.Foo.test_bar
+            ----------------------------------------
+            Ran 5 tests in 0.000s
+
+            FAILED (successes=3, failures=2)
+            """,  # noqa: E501
+        )
+
+    def test_single_test(self):
+        self.assertOutputIs(
+            tests=["virtue.tests.samples.one_successful_test"],
+            expected="""
+            .
+
+            ----------------------------------------
+            Ran 1 test in 0.000s
+
+            PASSED (successes=1)
+            """,
+        )
+
+    def test_empty_run(self):
+        self.assertOutputIs(
+            tests=[],
+            expected="""
+
+            ----------------------------------------
+            Ran 0 tests in 0.000s
+
+            PASSED
+            """,
+        )
+
+    def test_expected_failure(self):
+        self.assertOutputIs(
+            tests=["virtue.tests.samples.one_expected_failure"],
+            expected="""
+            x
+
+            ========================================
+            [XFAIL]
+
+            virtue.tests.samples.one_expected_failure.Foo.test_foo
+            ----------------------------------------
+            Ran 1 test in 0.000s
+
+            PASSED (expected_failures=1)
+            """,
+        )
+
+    def test_unexpected_success(self):
+        self.assertOutputIs(
+            tests=["virtue.tests.samples.failures_and_unexpected_passes"],
+            expected="""
+            uuFu.
+
+            ========================================
+            [FAIL]
+            Traceback (most recent call last):
+              File "•unittest/case.py•", line •, in •
+                •
+              File "•/failures_and_unexpected_passes.py•", line •, in test_foo
+                self.fail("Nope!")
+              •
+            AssertionError: Nope!
+
+            virtue.tests.samples.failures_and_unexpected_passes.Foo.test_foo
+            ========================================
+            [UNEXPECTED SUCCESS]
+
+            virtue.tests.samples.failures_and_unexpected_passes.Foo.test_bar
+            virtue.tests.samples.failures_and_unexpected_passes.Foo.test_baz
+            virtue.tests.samples.failures_and_unexpected_passes.Foo.test_quux
+            ----------------------------------------
+            Ran 5 tests in 0.000s
+
+            FAILED (successes=1, failures=1, unexpected_successes=3)
+            """,
+        )
+
+    def test_subtests(self):
+        self.assertOutputIs(
+            tests=["virtue.tests.samples.subtests"],
+            expected="""
+            ...FE
+
+            ========================================
+            [FAIL]
+            Traceback (most recent call last):
+              File "•unittest/case.py•", line •, in •
+                •
+              File "•/subtests.py•", line •, in test_subtests_one_fail_one_error
+                self.fail("Fail!")
+              •
+            AssertionError: Fail!
+
+            virtue.tests.samples.subtests.Foo.test_subtests_one_fail_one_error (i=1)
+            ========================================
+            [ERROR]
+            Traceback (most recent call last):
+              File "•unittest/case.py•", line •, in •
+                •
+              File "•/subtests.py•", line •, in test_subtests_one_fail_one_error
+                raise ZeroDivisionError()•
+            ZeroDivisionError•
+
+            virtue.tests.samples.subtests.Foo.test_subtests_one_fail_one_error (i=3)
+            ----------------------------------------
+            Ran 4 tests with 7 subtests in 0.000s
+
+            FAILED (successes=3, subtest_failures=1, subtest_errors=1)
+            """,  # noqa: E501
+        )
+
+    def test_output_is_compressed(self):
+        """
+        Albeit not sorted, so still not terribly reliably :/.
+        """
+        self.assertOutputIs(
+            tests=["virtue.tests.samples.repeated_similar_output"],
+            expected="""
+            sss
+
+            ========================================
+            [SKIPPED]
+            Skipped!
+            virtue.tests.samples.repeated_similar_output.Foo.test_a
+            ========================================
+            [SKIPPED]
+            Skipped 2!
+            virtue.tests.samples.repeated_similar_output.Foo.test_b
+            virtue.tests.samples.repeated_similar_output.Foo.test_c
+            ----------------------------------------
+            Ran 3 tests in 0.000s
+
+            PASSED (skips=3)
+            """,
+        )
+
+
+class TestTreeOutput(TestRunOutput):
+    outputter_cls = TreeOutputter
 
     def test_unsuccessful_run(self):
         self.assertOutputIs(
@@ -227,18 +405,6 @@ class TestRunOutput(unittest.TestCase):
             Ran 1 test in 0.000s
 
             PASSED (successes=1)
-            """,
-        )
-
-    def test_empty_run(self):
-        self.assertOutputIs(
-            tests=[],
-            expected="""
-
-            ----------------------------------------
-            Ran 0 tests in 0.000s
-
-            PASSED
             """,
         )
 
@@ -340,9 +506,6 @@ class TestRunOutput(unittest.TestCase):
         )
 
     def test_output_is_compressed(self):
-        """
-        Albeit not sorted, so still not terribly reliably :/.
-        """
         self.assertOutputIs(
             tests=["virtue.tests.samples.repeated_similar_output"],
             expected="""
@@ -366,4 +529,83 @@ class TestRunOutput(unittest.TestCase):
 
             PASSED (skips=3)
             """,
+        )
+
+
+class TestJSONOutput(unittest.TestCase):
+    def run_json(self, **kwargs):
+        reporter = ComponentizedReporter(
+            outputter=JSONOutputter(),
+            stream=StringIO(),
+            time=lambda: 0,
+        )
+        runner.run(reporter=reporter, **kwargs)
+        return json.loads(reporter.stream.getvalue())
+
+    def test_successful_run(self):
+        got = self.run_json(
+            tests=["virtue.tests.samples.one_successful_test"],
+        )
+        self.assertEqual(
+            got,
+            {
+                "successful": True,
+                "tests_run": 1,
+                "subtests": 0,
+                "runtime": 0,
+                "tests": {
+                    "virtue.tests.samples.one_successful_test.Foo.test_foo": {
+                        "status": "succeeded",
+                    },
+                },
+            },
+        )
+
+    def test_unsuccessful_run(self):
+        got = self.run_json(
+            tests=[
+                "virtue.tests.samples.one_successful_test",
+                "virtue.tests.samples.one_unsuccessful_test",
+            ],
+        )
+        self.assertFalse(got["successful"])
+        self.assertEqual(got["tests_run"], 2)
+        self.assertEqual(
+            got["tests"][
+                "virtue.tests.samples.one_successful_test.Foo.test_foo"
+            ],
+            {"status": "succeeded"},
+        )
+        failed = got["tests"][
+            "virtue.tests.samples.one_unsuccessful_test.Foo.test_foo"
+        ]
+        self.assertEqual(failed["status"], "failed")
+        self.assertIn("AssertionError", failed["traceback"])
+
+    def test_skips_and_expected_failures(self):
+        got = self.run_json(
+            tests=[
+                "virtue.tests.samples.repeated_similar_output",
+                "virtue.tests.samples.one_expected_failure",
+                "virtue.tests.samples.failures_and_unexpected_passes",
+            ],
+        )
+        self.assertFalse(got["successful"])
+        self.assertEqual(
+            got["tests"][
+                "virtue.tests.samples.repeated_similar_output.Foo.test_a"
+            ],
+            {"status": "skipped", "reason": "Skipped!"},
+        )
+        self.assertEqual(
+            got["tests"][
+                "virtue.tests.samples.one_expected_failure.Foo.test_foo"
+            ]["status"],
+            "expected_failure",
+        )
+        self.assertEqual(
+            got["tests"][
+                "virtue.tests.samples.failures_and_unexpected_passes.Foo.test_bar"
+            ],
+            {"status": "unexpected_success"},
         )

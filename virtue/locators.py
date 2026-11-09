@@ -2,20 +2,14 @@
 Loaders find tests which are referenced by names, preparing them for running.
 """
 
+from pathlib import Path
+from pkgutil import resolve_name, walk_packages
 from unittest import TestCase
+import importlib
 import inspect
-
-try:
-    from pkgutil import resolve_name
-except ImportError:
-    from pkgutil_resolve_name import (  # type: ignore[import-not-found, no-redef]
-        resolve_name,
-    )
+import itertools
 
 from attrs import define, field
-from twisted.python.modules import getModule as get_module
-from twisted.python.reflect import fullyQualifiedName as fully_qualified_name
-from twisted.trial.runner import filenameToModule as filename_to_module
 
 from virtue.loaders import AttributeLoader, ModuleLoader
 
@@ -24,6 +18,25 @@ class UnableToLoad(Exception):
     """
     A test couldn't be loaded.
     """
+
+
+def _path_to_module(name: str):
+    path = Path(name).resolve()
+    if not path.exists():
+        raise FileNotFoundError(name)
+
+    if path.is_file():
+        parts = [path.stem] if path.stem != "__init__" else []
+        current = path.parent
+    else:
+        parts = []
+        current = path
+
+    while (current / "__init__.py").exists():
+        parts.append(current.name)
+        current = current.parent
+
+    return importlib.import_module(".".join(reversed(parts)))
 
 
 def prefixed_by(prefix):
@@ -111,10 +124,7 @@ class ObjectLocator:
         try:
             obj = resolve_name(name)
         except ValueError:
-            try:
-                obj = filename_to_module(name)
-            except ValueError as error:
-                raise FileNotFoundError(error) from error
+            obj = _path_to_module(name)
 
         try:
             return self.locate_in(obj)
@@ -133,7 +143,7 @@ class ObjectLocator:
                     return [AttributeLoader(cls=cls, attribute=method_name)]
 
             # Aliased attributes
-            fqon = fully_qualified_name(obj)
+            fqon = f"{obj.__module__}.{obj.__qualname__}"
             class_name, _, method_name = fqon.rpartition(".")
             cls = resolve_name(class_name)
             if inspect.isclass(cls):
@@ -163,10 +173,18 @@ class ObjectLocator:
         """
         Locate all of the test cases contained in the given package.
         """
-        for module in get_module(package.__name__).walkModules():
-            _, _, name = module.name.rpartition(".")
+        submodules = walk_packages(
+            path=package.__path__,
+            prefix=f"{package.__name__}.",
+        )
+        names = itertools.chain(
+            [package.__name__],
+            (info.name for info in submodules),
+        )
+        for fqmn in names:
+            _, _, name = fqmn.rpartition(".")
             if self.is_test_module(name):
-                yield ModuleLoader(locator=self, module=module)
+                yield ModuleLoader(locator=self, name=fqmn)
 
     def locate_in_module(self, module):
         """

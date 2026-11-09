@@ -1,9 +1,8 @@
 from unittest import TestCase
 import os
 
-from twisted.trial.reporter import TreeReporter
-
 from virtue import _cli
+from virtue.reporters import ComponentizedReporter, TreeOutputter
 
 
 def DumbReporter():
@@ -20,7 +19,8 @@ class TestParser(TestCase):
 
     def test_it_retrieves_built_in_reporters_by_name(self):
         arguments = self.parse_args(["--reporter", "tree", "foo"])
-        self.assertIsInstance(arguments["reporter"], TreeReporter)
+        self.assertIsInstance(arguments["reporter"], ComponentizedReporter)
+        self.assertIsInstance(arguments["reporter"].outputter, TreeOutputter)
 
     def test_it_retrieves_other_reporters_by_fully_qualified_name(self):
         arguments = self.parse_args(
@@ -44,13 +44,12 @@ class TestParser(TestCase):
 
 
 class TestMain(TestCase):
-    # TODO: these write to stdout
     def test_it_exits_successfully_for_successful_runs(self):
         with self.assertRaises(SystemExit) as e:
             _cli.main(
                 [
                     "--reporter",
-                    "summary",
+                    "quiet",
                     "virtue.tests.samples.one_successful_test",
                 ],
             )
@@ -61,7 +60,7 @@ class TestMain(TestCase):
             _cli.main(
                 [
                     "--reporter",
-                    "text",
+                    "quiet",
                     "virtue.tests.samples.one_unsuccessful_test",
                 ],
             )
@@ -80,5 +79,11 @@ class TestMain(TestCase):
 
     def test_it_exits_unsuccessfully_when_no_tests_ran(self):
         with self.assertRaises(SystemExit) as e:
-            _cli.main(["virtue.tests.samples.no_tests"])
+            _cli.main(
+                [
+                    "--reporter",
+                    "quiet",
+                    "virtue.tests.samples.no_tests",
+                ],
+            )
         self.assertNotEqual(e.exception.code, os.EX_OK)

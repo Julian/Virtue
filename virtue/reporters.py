@@ -4,6 +4,7 @@ Outputting and reporting for virtuous test runs.
 
 from collections import defaultdict
 from traceback import format_exception
+import json
 import sys
 import time
 
@@ -37,28 +38,24 @@ class Outputter:
     An outputter converts test results to renderable strings.
     """
 
-    _last_test_class = None
-    _last_test_module = None
-    _current_subtests_test = None
-
     FAILED, PASSED = "FAILED", "PASSED"
     ERROR, FAIL, OK, SKIPPED = "[ERROR]", "[FAIL]", "[OK]", "[SKIPPED]"
     EXPECTED_FAILURE, UNEXPECTED_SUCCESS = "[XFAIL]", "[UNEXPECTED SUCCESS]"
 
     _COLORS = [
-        ("_error", "RED", ERROR),
-        ("_fail", "RED", FAIL),
+        ("_error", "RED", "E"),
+        ("_fail", "RED", "F"),
         ("_failed", "RED", FAILED),
-        ("_ok", "GREEN", OK),
+        ("_ok", "GREEN", "."),
         ("_passed", "GREEN", PASSED),
-        ("_skipped", "BLUE", SKIPPED),
-        ("_unexpected_success", "YELLOW", UNEXPECTED_SUCCESS),
-        ("_expected_failure", "BLUE", EXPECTED_FAILURE),
+        ("_skipped", "BLUE", "s"),
+        ("_unexpected_success", "YELLOW", "u"),
+        ("_expected_failure", "BLUE", "x"),
     ]
 
-    def __init__(self, colored=True, indent=" " * 2, line_width=120):
-        self.indent = indent
+    def __init__(self, colored=True, line_width=120):
         self.line_width = line_width
+        self._column = 0
 
         if colored:
             from colorama import Fore, Style  # noqa: PLC0415
@@ -86,6 +83,12 @@ class Outputter:
         message = _DelayedMessage(width=self.line_width, **kwargs)
         self._later[message.status][message.body].append(message)
 
+    def _dot(self, symbol):
+        if self._column and self._column % self.line_width == 0:
+            yield "\n"
+        self._column += 1
+        yield symbol
+
     def run_started(self):
         """
         Output nothing.
@@ -95,6 +98,11 @@ class Outputter:
         """
         Output all the messages stored for later, as well as a final summary.
         """
+        if self._column:
+            yield "\n"
+        yield from self._summarize(recorder, runtime)
+
+    def _summarize(self, recorder, runtime):
         for status in self._later.values():
             for messages in status.values():
                 if not messages:
@@ -147,6 +155,123 @@ class Outputter:
 
     def test_started(self, test):
         """
+        Output nothing.
+        """
+
+    def test_stopped(self, test):
+        """
+        Output nothing.
+        """
+
+    def test_errored(self, test, exc_info):
+        """
+        Output an error.
+        """
+        self._show_later(
+            status=self.ERROR,
+            body="".join(format_exception(*exc_info)),
+            subject=test,
+        )
+        return self._dot(self._error)
+
+    def test_failed(self, test, exc_info):
+        """
+        Output a failure.
+        """
+        self._show_later(
+            status=self.FAIL,
+            body="".join(format_exception(*exc_info)),
+            subject=test,
+        )
+        return self._dot(self._fail)
+
+    def test_skipped(self, test, reason):
+        """
+        Output a skip.
+        """
+        self._show_later(status=self.SKIPPED, body=reason, subject=test)
+        return self._dot(self._skipped)
+
+    def test_expectedly_failed(self, test, exc_info):
+        """
+        Output an expected failure.
+        """
+        self._show_later(status=self.EXPECTED_FAILURE, subject=test)
+        return self._dot(self._expected_failure)
+
+    def test_unexpectedly_succeeded(self, test):
+        """
+        Output an unexpected success.
+        """
+        self._show_later(status=self.UNEXPECTED_SUCCESS, subject=test)
+        return self._dot(self._unexpected_success)
+
+    def test_succeeded(self, test):
+        """
+        Output a success.
+        """
+        return self._dot(self._ok)
+
+    def subtest_succeeded(self, test, subtest):
+        """
+        Output nothing.
+        """
+
+    def subtest_failed(self, test, subtest, exc_info):
+        """
+        Output a failed subtest.
+        """
+        self._show_later(
+            status=self.FAIL,
+            body="".join(format_exception(*exc_info)),
+            subject=subtest,
+        )
+        return self._dot(self._fail)
+
+    def subtest_errored(self, test, subtest, exc_info):
+        """
+        Output an errored subtest.
+        """
+        self._show_later(
+            status=self.ERROR,
+            body="".join(format_exception(*exc_info)),
+            subject=subtest,
+        )
+        return self._dot(self._error)
+
+
+class TreeOutputter(Outputter):
+    """
+    An outputter that renders a tree of modules, classes and test methods.
+    """
+
+    _last_test_class = None
+    _last_test_module = None
+    _current_subtests_test = None
+
+    _COLORS = [
+        ("_error", "RED", Outputter.ERROR),
+        ("_fail", "RED", Outputter.FAIL),
+        ("_failed", "RED", Outputter.FAILED),
+        ("_ok", "GREEN", Outputter.OK),
+        ("_passed", "GREEN", Outputter.PASSED),
+        ("_skipped", "BLUE", Outputter.SKIPPED),
+        ("_unexpected_success", "YELLOW", Outputter.UNEXPECTED_SUCCESS),
+        ("_expected_failure", "BLUE", Outputter.EXPECTED_FAILURE),
+    ]
+
+    def __init__(self, colored=True, line_width=120, indent=" " * 2):
+        super().__init__(colored=colored, line_width=line_width)
+        self.indent = indent
+
+    def run_stopped(self, recorder, runtime):
+        """
+        Output all the messages stored for later, as well as a final summary.
+        """
+        yield from self._summarize(recorder, runtime)
+
+    def test_started(self, test):
+        """
         Output the test name.
         """
         cls = test.__class__
@@ -162,11 +287,6 @@ class Outputter:
             yield self.indent
             yield cls.__name__
             yield "\n"
-
-    def test_stopped(self, test):
-        """
-        Output nothing.
-        """
 
     def test_errored(self, test, exc_info):
         """
@@ -217,11 +337,6 @@ class Outputter:
         """
         return self._format_line(test, self._ok)
 
-    def subtest_succeeded(self, test, subtest):
-        """
-        Output nothing.
-        """
-
     def subtest_failed(self, test, subtest, exc_info):
         """
         Output a failed subtest.
@@ -262,6 +377,116 @@ class Outputter:
         return left + " " * space + right
 
 
+@attrs.define
+class JSONOutputter:
+    """
+    An outputter that renders test results as machine-parseable JSON.
+    """
+
+    _tests: dict = attrs.field(factory=dict, init=False, repr=False)
+
+    def run_started(self):
+        """
+        Output nothing.
+        """
+
+    def run_stopped(self, recorder, runtime):
+        """
+        Output the complete test run report as JSON.
+        """
+        payload = {
+            "successful": recorder.wasSuccessful(),
+            "tests_run": recorder.testsRun,
+            "subtests": recorder.subtests,
+            "runtime": runtime,
+            "tests": self._tests,
+        }
+        yield json.dumps(payload)
+        yield "\n"
+
+    def test_started(self, test):
+        """
+        Output nothing.
+        """
+
+    def test_stopped(self, test):
+        """
+        Output nothing.
+        """
+
+    def test_errored(self, test, exc_info):
+        """
+        Record an error.
+        """
+        self._tests[test.id()] = {
+            "status": "errored",
+            "traceback": "".join(format_exception(*exc_info)),
+        }
+
+    def test_failed(self, test, exc_info):
+        """
+        Record a failure.
+        """
+        self._tests[test.id()] = {
+            "status": "failed",
+            "traceback": "".join(format_exception(*exc_info)),
+        }
+
+    def test_skipped(self, test, reason):
+        """
+        Record a skip.
+        """
+        self._tests[test.id()] = {
+            "status": "skipped",
+            "reason": reason,
+        }
+
+    def test_expectedly_failed(self, test, exc_info):
+        """
+        Record an expected failure.
+        """
+        self._tests[test.id()] = {
+            "status": "expected_failure",
+            "traceback": "".join(format_exception(*exc_info)),
+        }
+
+    def test_unexpectedly_succeeded(self, test):
+        """
+        Record an unexpected success.
+        """
+        self._tests[test.id()] = {"status": "unexpected_success"}
+
+    def test_succeeded(self, test):
+        """
+        Record a success.
+        """
+        self._tests[test.id()] = {"status": "succeeded"}
+
+    def subtest_succeeded(self, test, subtest):
+        """
+        Record a passing subtest.
+        """
+        self._tests[subtest.id()] = {"status": "succeeded"}
+
+    def subtest_failed(self, test, subtest, exc_info):
+        """
+        Record a failed subtest.
+        """
+        self._tests[subtest.id()] = {
+            "status": "failed",
+            "traceback": "".join(format_exception(*exc_info)),
+        }
+
+    def subtest_errored(self, test, subtest, exc_info):
+        """
+        Record an errored subtest.
+        """
+        self._tests[subtest.id()] = {
+            "status": "errored",
+            "traceback": "".join(format_exception(*exc_info)),
+        }
+
+
 @attrs.define(slots=False)
 class Counter:
     """
@@ -270,6 +495,7 @@ class Counter:
 
     errors: int = 0
     failures: int = 0
+    skips: int = 0
     expected_failures: int = 0
     unexpected_successes: int = 0
     successes: int = 0
@@ -301,6 +527,9 @@ class Counter:
     def addFailure(self, test, exc_info):  # noqa: D102
         self.failures += 1
 
+    def addSkip(self, test, reason):  # noqa: D102
+        self.skips += 1
+
     def addExpectedFailure(self, *args, **kwargs):  # noqa: D102
         self.expected_failures += 1
 
@@ -320,6 +549,15 @@ class Counter:
             self.subtest_failures += 1
         else:
             self.subtest_errors += 1
+
+    def wasSuccessful(self):  # noqa: D102
+        return not (
+            self.errors
+            or self.failures
+            or self.unexpected_successes
+            or self.subtest_failures
+            or self.subtest_errors
+        )
 
 
 @attrs.define(slots=False)
@@ -433,7 +671,7 @@ class ComponentizedReporter:
     Combine together outputting and recording capabilities.
     """
 
-    outputter: Outputter = attrs.field(factory=Outputter)
+    outputter = attrs.field(factory=Outputter)
     recorder = attrs.field(factory=Recorder, repr=False)
     stream = attrs.field(default=sys.stdout)
     _time = attrs.field(default=time.time, repr=False)
