@@ -1,5 +1,5 @@
 [build-system]
-requires = ["hatchling", "hatch-vcs"]
+requires = ["hatchling>=1.26", "hatch-vcs"]
 build-backend = "hatchling.build"
 
 [tool.hatch.version]
@@ -46,6 +46,17 @@ Homepage = "https://github.com/Julian/Virtue"
 Issues = "https://github.com/Julian/Virtue/issues/"
 Funding = "https://github.com/sponsors/Julian"
 Source = "https://github.com/Julian/Virtue"
+
+[dependency-groups]
+docs = [
+  "furo",
+  "pygments-github-lexers",
+  "sphinx",
+  "sphinx-copybutton",
+  "sphinxcontrib-spelling",
+  "sphinxext-opengraph",
+  "pyenchant>=3.3.0rc1",  # Until pyenchant/pyenchant#302 is released...
+]
 
 [tool.coverage.html]
 show_contexts = true

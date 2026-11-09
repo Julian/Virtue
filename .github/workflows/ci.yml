@@ -52,18 +52,6 @@ jobs:
       - name: Install dependencies
         run: brew install enchant
         if: runner.os == 'macOS' && startsWith(matrix.noxenv, 'docs')
-      - name: Set up Python
-        uses: actions/setup-python@v7
-        with:
-          python-version: |
-            3.10
-            3.11
-            3.12
-            3.13
-            3.14
-            3.14t
-            pypy3.11
-          allow-prereleases: true
 
       - name: Set up uv
         uses: astral-sh/setup-uv@v7
@@ -92,7 +80,7 @@ jobs:
           enable-cache: true
 
       - name: Build our distributions
-        run: uv run --with 'build[uv]' -m build --installer=uv
+        run: uv run --frozen --with 'build[uv]' -m build --installer=uv
 
       - name: Publish to PyPI
         if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
